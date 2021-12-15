@@ -1,0 +1,532 @@
+openapi: 3.0.2
+info:
+  title: 'Auth Processing API'
+  version: ''
+  description: |
+    запросы к API начинаются с `/api/v1/`
+    # Описание
+    Вспомогательный API для Movies. Реализует регистрацию и аутентификацию пользователей. Личный кабинет пользователя, историю логинов. Создание и назначение ролей пользователей.
+    # Алгоритм регистрации пользователей
+    1. Пользователь регистрируется на `/auth/registration/` c username, email и паролем 
+    2. Пользователь получает JWT токены на `/auth/token/` указыая username и пароль
+    3. При желании пользователь отправляет PATCH-запрос на `/users/me/` и заполняет поля в своём профайле (описание полей — в документации).
+    4. Если JWT-access токен истек, обновить его множно тут `/auth/refresh/`
+    5. Узнать историю посещений пользователь может тут `/users/history/`
+    
+    # Пользовательские роли
+    - **Аноним** — может просматривать детальную информацию обо всех фильмах за исключением новинок (за последние 3 года).
+    - **Аутентифицированный пользователь** — может, как и **Аноним**, просматривать все фильмы без исключений, менять свои пароль, email и логин, просматривать историю посещений.
+    - **Администратор** — может создавать, изменять и удалять роли пользователей, назначать их пользователям и снимать их. Просматривать список ролей.
+    
+    # Как работает это API а связке с Movies API
+    
+    1. К **Movies API** приходит запрос от пользователя
+    2. **Movies API** считает пользователя **Анонимом** если в запросе нет заголовка **Authorization** Bearer JWT-assess token.
+    3. Если токен в заголовке есть - делает get запрос к эндпоинту **Auth API** `/users/me/` с этим же заголовком.
+    4. **Auth API** проверяет, есть ли Access Token в базе **Redis** просроченых токенов. Если не просрочен, проверяет валидность токена.
+    5. Если JWT токен валидный, **Movies API** получает инфо о пользователе, в том числе его Роль.
+    6. Если токен невалидный, **Movies API** считает пользователя **Анонимом**
+    7. Далее, вся работа по определению к каким разделам допускать пользователей с разными ролями - т.е. авторизациию, ведет сам **Movies API**
+    
+    PS. Мы оставляем на откуп фронтенда, как он будет обращаться к эндпоинтам разных микросервисов: регистрацию, обновления токена, инфо о пользователе, получение данных о фильмах и т.п.
+
+servers:
+  - url: /api/v1/
+
+tags:
+  - name: AUTH
+    description: Аутентификация
+  - name: USERS
+    description: Пользователи
+  - name: ROLES
+    description: Роли
+
+paths:
+
+  /auth/registration/:
+    post:
+      tags:
+        - AUTH
+      description: Регистрация пользователя.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - login
+                - password
+                - email
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                  writeOnly: true
+                email:
+                  type: string
+                  format: email
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  login:
+                    type: string
+
+          description: 'Регистрация успешна!'
+        409:
+            content:
+              application/json:
+                schema:
+                  properties:
+                    login:
+                      type: string
+                    email:
+                      type: string
+                      format: email
+            description: 'Пользователь с таким login или email уже зарегистрирован!'
+
+  /auth/login/:
+    post:
+      tags:
+        - AUTH
+      description: Получение JWT-токена в обмен на username и login.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+                  format: password
+                  writeOnly: true
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+          description: ''
+        400:
+          description: Ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /auth/refresh/:
+    post:
+      tags:
+        - AUTH
+      description: Получить JWT-токены в обмен на JWT-refresh token Права доступа:**Требуется JWT-refresh token**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - JWT-refresh-token
+              properties:
+                JWT-refresh-token:
+                  type: string
+                  format: JWT
+                  writeOnly: true
+
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+          description: ''
+        400:
+          description: Ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /auth/logout/:
+    get:
+      tags:
+        - AUTH
+      description: Завершить сессию (переместить access token в logouts) Права доступа:**Любой авторизованный пользователь**
+      responses:
+        200:
+          description: Ok
+        401:
+          description: Необходим JWT токен
+      security:
+      - jwt_auth:
+        - read:admin,user
+        - write:admin,user
+
+  /users/me/:
+    get:
+      tags:
+        - USERS
+      description: |
+        Получить данные своей учетной записи
+        Права доступа: **Любой авторизованный пользователь**
+
+      responses:
+        200:
+          description: Объект своей учетной записи
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/User'
+      security:
+      - jwt_auth:
+        - read:admin,user
+        - write:admin,user
+    patch:
+      tags:
+        - USERS
+      description: |
+        Изменить данные своей учетной записи
+        Права доступа: **Любой авторизованный пользователь**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        200:
+          description: Пользователь
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: Ошибка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+
+
+      security:
+      - jwt_auth:
+        - read:admin,user
+        - write:admin,user
+
+  /users/history/:
+    get:
+      tags:
+        - USERS
+      description: |
+        Получить историю **своих** логинов
+        Права доступа: **Любой авторизованный пользователь**
+      responses:
+        200:
+          description: Список истории заходов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                    logins:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Logins'
+        401:
+          description: Необходим JWT токен
+      security:
+      - jwt_auth:
+        - read:admin,user
+        - write:admin,user
+
+  /role/:
+    get:
+      tags:
+        - ROLES
+      description: |
+          Список ролей
+          Права доступа: **Администратор**
+      responses:
+        200:
+          description: Список ролей
+          content:
+            application/json:
+              schema:
+                properties:
+                  roles:
+                    type: array
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+      security:
+      - jwt_auth:
+        - read:admin
+        - write:admin
+    post:
+      tags:
+        - ROLES
+      description: |
+        Создать Роль (для назначения пользователям)
+        Права доступа: **Администратор**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+      responses:
+        200:
+          description: Роль успешно создана
+          content:
+            application/json:
+              schema:
+                properties:
+                  created_role:
+                    type: string
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+      security:
+      - jwt_auth:
+        - read:admin
+        - write:admin
+
+  /role/{uuid}:
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: Роль (UUID)
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags:
+        - ROLES
+      description: |
+        Удалить Роль
+        Права доступа: **Администратор**
+      responses:
+        204:
+          description: Роль удалёнa
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Роль не найдена
+      security:
+      - jwt_auth:
+        - read:admin
+        - write:admin
+    patch:
+      tags:
+        - ROLES
+      description: |
+        Изменить Роль.
+        Права доступа: **Администратор.**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - uuid
+              properties:
+                uuid:
+                  type: string
+      responses:
+        200:
+          description: Роль успешно обновленна
+          content:
+            application/json:
+              schema:
+                properties:
+                  updated_role:
+                    type: string
+        400:
+          description: Ошибка валидации
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Роль не найдена
+      security:
+      - jwt_auth:
+        - read:admin
+        - write:admin
+
+  /role/admit/:
+    post:
+      tags:
+        - ROLES
+      description: |
+        Назначить Роль (UUID) пользователю по UUID
+        Права доступа: **Администратор**
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - role
+                - user
+              properties:
+                role:
+                  type: string
+                  format: uuid
+                user:
+                  type: string
+                  format: uuid
+
+      responses:
+        200:
+          description: Роль назначена
+          content:
+            application/json:
+              schema:
+                properties:
+                  admited:
+                    type: string
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Нет такой роли или пользователя
+
+      security:
+      - jwt_auth:
+        - read:admin
+        - write:admin
+
+  /role/{role-uuid}/{user-uuid}/:
+    parameters:
+      - name: role-uuid
+        in: path
+        required: true
+        description: Роль (UUID)
+        schema:
+          type: string
+          format: uuid
+      - name: user-uuid
+        in: path
+        required: true
+        description: Пользователь (UUID)
+        schema:
+          type: string
+          format: uuid
+    delete:
+      tags:
+          - ROLES
+      description: |
+          Удалить Роль (UUID) пользователя по UUID
+          Права доступа: **Администратор**
+      responses:
+        200:
+          description: Роль назначена
+          content:
+            application/json:
+              schema:
+                properties:
+                  deleted:
+                    type: string
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Нет такой роли или пользователя
+
+      security:
+      - jwt_auth:
+        - read:admin
+        - write:admin
+
+
+
+components:
+  schemas:
+    User:
+      title: Пользователь
+      type: object
+      description: Детальная информация о пользователе
+      required:
+          - username
+          - email
+      properties:
+        first_name:
+          type: string
+          title: Имя
+        last_name:
+          type: string
+          title: Фамилия
+        username:
+          type: string
+          title: Username
+        bio:
+          type: string
+          title: О себе
+        email:
+          type: string
+          title: Адрес электронной почты
+        role:
+          type: string
+          description: Администратор или пользователь. По умолчанию `user`.
+          enum:
+            - user
+            - admin
+
+    Logins:
+      title: Список логинов
+      type: object
+      description: Детальная информация о логинах пользователя
+      properties:
+        login:
+          type: array
+          items:
+            type: string
+            title: Инфо о логине
+
+
+    ValidationError:
+      title: Ошибка валидации
+      type: object
+      properties:
+        field_name:
+          type: array
+          items:
+            type: string
+
+    Token:
+      title: Токен
+      type: object
+      properties:
+        token:
+          type: string
+          title: access токен
+
+
+  securitySchemes:
+    jwt_auth:
+      type: apiKey
+      name: Bearer
+      in: header

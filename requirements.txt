@@ -1,0 +1,13 @@
+asgiref==3.4.1
+click==8.0.3
+Flask[async]==2.0.2
+itsdangerous==2.0.1
+Jinja2==3.0.3
+MarkupSafe==2.0.1
+Werkzeug==2.0.2
+
+gevent~=21.12.0
+Flask-SQLAlchemy~=2.5.1
+
+redis~=4.0.2
+SQLAlchemy~=1.4.28

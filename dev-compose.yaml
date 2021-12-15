@@ -1,0 +1,43 @@
+version: "3.6"
+
+volumes:
+  redis_data_auth:
+    name: redis_data_auth
+  postgres_data_auth:
+    name: postgres_data_auth
+
+services:
+  postgres_auth:
+    image: postgres:13.0
+    container_name: postgres_auth
+    restart: always
+    volumes:
+      - postgres_data_auth:/var/lib/postgresql/data/
+    ports:
+      - "5433:5432"
+    env_file:
+      - .env
+    networks:
+      - auth
+
+  redis_auth:
+    image: redis:6.2.6-bullseye
+    container_name: redis_auth
+    restart: always
+    volumes:
+     - redis_data_auth:/data
+    depends_on:
+      - postgres_auth
+    ports:
+     - "6363:6379"
+    networks:
+     - auth
+
+
+networks:
+  auth:
+    driver: bridge
+
+
+
+
