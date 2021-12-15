@@ -25,7 +25,6 @@ CREATE TABLE IF NOT EXISTS auth.jwt (
     id uuid PRIMARY KEY,
     user_id uuid NOT NULL,
     refresh_token text NOT NULL,
-    expire timestamptz NOT NULL,
     created_at timestamptz,
     updated_at timestamptz
 );
