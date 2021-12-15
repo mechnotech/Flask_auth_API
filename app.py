@@ -1,35 +1,27 @@
+from datetime import timedelta
+
 from flask import Flask
 from flask import jsonify
 from flask import request
-from flask_jwt_extended import JWTManager
-from flask_jwt_extended import create_access_token
-from flask_jwt_extended import get_jwt_identity
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    jwt_required,
+    get_jwt,
+)
+from dbs.db import db, cache
+from db_models.models import User, Profile
 
+ACCESS_EXPIRES = timedelta(hours=1)
+REFRESH_EXPIRES = timedelta(days=1)
 app = Flask(__name__)
 
-some_template = '''
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title></title>
-</head>
-<body>
-<p>Авторизуйтесь</p>
-<form method="get" action="/login">
-<input required name="login">
-<input required type="password" name="password">
-<button type="submit">Отворить ворота!</button>
-</form>
-</body>
-</html>
-
-'''
-
-
 # Setup the Flask-JWT-Extended extension
-app.config["JWT_SECRET_KEY"] = "Eww3ssefw2931dfsd"  # Change this!
+app.config['JWT_SECRET_KEY'] = 'Eww3ssefw2931dfsd'  # Change this!
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXPIRES
 jwt = JWTManager(app)
 
 
@@ -43,7 +35,8 @@ def login():
         return jsonify({"msg": "Bad username or password"}), 401
 
     access_token = create_access_token(identity=username, additional_claims={'role': 'admin'})
-    return jsonify(access_token=access_token)
+    refresh_token = create_refresh_token(identity=username)
+    return jsonify(access_token=access_token, refresh_token=refresh_token)
 
 
 # Protect a route with jwt_required, which will kick out requests

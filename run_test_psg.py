@@ -1,6 +1,6 @@
 from app import app
-from db import db, init_db
-from db_models import User, Profile
+from dbs.db import db, init_db
+from db_models.models import User, Profile
 
 # Подготоваливаем контекст и создаём таблицы
 init_db(app)

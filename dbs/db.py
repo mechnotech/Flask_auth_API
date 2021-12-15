@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import redis
 
 db = SQLAlchemy()
-redis_db = redis.Redis(host='localhost', port=6363, db=0)
+cache = redis.Redis(host='localhost', port=6363, db=0)
 
 
 def init_db(app: Flask):
