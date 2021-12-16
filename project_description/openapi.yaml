@@ -125,19 +125,7 @@ paths:
     post:
       tags:
         - AUTH
-      description: Получить JWT-токены в обмен на JWT-refresh token Права доступа:**Требуется JWT-refresh token**
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required:
-                - JWT-refresh-token
-              properties:
-                JWT-refresh-token:
-                  type: string
-                  format: JWT
-                  writeOnly: true
-
+      description: Получить JWT-токены в обмен на JWT-refresh token Права доступа:**Аутентифицированный пользователь**
       responses:
         200:
           content:
@@ -151,6 +139,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+      security:
+        - jwt_auth:
+              - read:admin,user
+              - write:admin,user
 
   /auth/logout/:
     get:

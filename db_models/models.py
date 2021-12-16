@@ -28,13 +28,13 @@ class Profile(db.Model):
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
     first_name = db.Column(db.String(128))
     last_name = db.Column(db.String(128))
-    role = db.Column(db.String(100))
+    role = db.Column(db.String(100), default='user')
     bio = db.Column(db.String(10000))
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     def __repr__(self):
-        return f'<Profile {self.user_id}>'
+        return f'<Profile user {self.user_id}>'
 
 
 class JwtRefresh(db.Model):
@@ -46,4 +46,16 @@ class JwtRefresh(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     def __repr__(self):
-        return f'<Profile {self.user_id}>'
+        return f'<JWT refresh token for user {self.user_id}>'
+
+
+class Login(db.Model):
+    __tablename__ = 'logins'
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    info = db.Column(db.String)
+    status = db.Column(db.String, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Login user {self.user_id}>'
