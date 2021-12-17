@@ -1,7 +1,7 @@
+import datetime
 from typing import Optional
 
 import orjson
-
 from pydantic import BaseModel, EmailStr
 
 
@@ -27,5 +27,19 @@ class UserSet(LoginSet):
 class ProfileSet(AdvancedJsonModel):
     first_name: Optional[str]
     last_name: Optional[str]
-    role: Optional[str]
+    role: Optional[list]
     bio: Optional[str]
+
+
+class LogSet(AdvancedJsonModel):
+    info: str
+    status: str
+    created_at: datetime.datetime
+
+
+class RoleSet(AdvancedJsonModel):
+    role: str
+
+
+class RoleUser(RoleSet):
+    user: str

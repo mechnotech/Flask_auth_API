@@ -1,12 +1,28 @@
 import hmac
-from typing import Tuple, Union, Optional
+from functools import wraps
+from typing import Tuple, Union, Optional, Any
 
-from flask_jwt_extended import create_access_token, create_refresh_token, get_jti
+from flask import make_response, jsonify
+from flask_jwt_extended import (
+    create_access_token,
+    create_refresh_token,
+    get_jti,
+    jwt_required,
+    get_jwt_identity,
+    get_jwt
+)
+from orjson import orjson
+from pydantic import ValidationError
+from werkzeug.exceptions import abort
 
-from db_models.models import User, SALT, Profile, JwtRefresh, Login
+from db_models.models import User, SALT, Profile, JwtRefresh, Login, Role
 from dbs.db import db, cache
 from settings import ACCESS_EXPIRES, REFRESH_EXPIRES, ADMIN_ROLES
-from utils.models import UserSet, ProfileSet
+from utils.models import UserSet, ProfileSet, LogSet, RoleSet
+
+
+def show_error(text: Optional[Any], http_code: int):
+    return abort(make_response(jsonify({"msg": text}), http_code))
 
 
 def sign(password: str) -> str:
@@ -14,9 +30,9 @@ def sign(password: str) -> str:
     return sig.hexdigest()
 
 
-def get_user_tokens(user, role='user') -> Tuple[str, str]:
-    access_token = create_access_token(identity=user.login, additional_claims={'role': role})
-    refresh_token = create_refresh_token(identity=user.login, additional_claims={'role': role})
+def get_user_tokens(user) -> Tuple[str, str]:
+    access_token = create_access_token(identity=user.login)
+    refresh_token = create_refresh_token(identity=user.login)
     return access_token, refresh_token
 
 
@@ -80,7 +96,13 @@ def do_checkout(user, info: str, status='login', jwt_id=Optional[str], refresh_t
 def get_profile(user):
     Profile.query.all()
     profile = Profile.query.filter_by(user_id=user.id).first()
-    return ProfileSet(first_name=profile.first_name, last_name=profile.last_name, role=profile.role, bio=profile.bio)
+    return orjson.loads(
+        ProfileSet(
+            first_name=profile.first_name,
+            last_name=profile.last_name,
+            role=[str(x) for x in profile.role],
+            bio=profile.bio
+        ).json())
 
 
 def update_profile(profile: ProfileSet, user: User):
@@ -108,3 +130,121 @@ def register_user_data(refresh_token, user: UserSet):
     db.session.add(profile)
     db.session.add(jwt_token)
     db.session.commit()
+
+
+def get_logins(user):
+    Login.query.all()
+    logins = Login.query.filter_by(user_id=user.id).all()
+    result = [orjson.loads(LogSet(created_at=x.created_at, info=x.info, status=x.status).json()) for x in logins]
+    return result
+
+
+def _get_role(role_name: str, check_exist=False, check_missing=False):
+    """
+    Получение роли по её названию из базы
+    :param role_name: Название роли, например user
+    :param check_exist: Проверить и поднять ошибку если роль уже существует
+    :param check_missing: Проверить и поднять ошибку если роль не существует
+    :return:
+    """
+    Role.query.all()
+    role = Role.query.filter_by(role=role_name).one_or_none()
+    if check_missing and not role:
+        show_error(f'Такой роли: {role} нет', 404)
+    if check_exist and role:
+        show_error(f'Роль с таким названием уже существует!', 400)
+    return role
+
+
+def set_role(role_name: str):
+    _get_role(role_name, check_exist=True)
+    role = Role(role=role_name)
+    db.session.add(role)
+    db.session.commit()
+
+
+def update_role(role: str, role_new: RoleSet):
+    db_role = _get_role(role, check_missing=True)
+    _get_role(role_new.role, check_exist=True)
+    db_role.role = role_new.role
+    db.session.add(db_role)
+    db.session.commit()
+
+
+def delete_role(role_name):
+    db_role = _get_role(role_name, check_missing=True)
+    db.session.delete(db_role)
+    db.session.commit()
+
+
+def roles_list():
+    roles = Role.query.all()
+    return [x.role for x in roles]
+
+
+def _get_role_user_details(role_name: str, username: str) -> Tuple[Role, User]:
+    Role.query.all()
+    role = Role.query.filter_by(role=role_name).one_or_none()
+    User.query.all()
+    user = User.query.filter_by(login=username).one_or_none()
+    return role, user
+
+
+def admit_role(user_role):
+    role, user = _get_role_user_details(role_name=user_role.role, username=user_role.user)
+    if role and user:
+        Profile.query.all()
+        profile = Profile.query.filter_by(user_id=user.id).first()
+        profile.add_role(role=role)
+        db.session.commit()
+        return
+    return show_error('Нет такой роли или пользователя', 404)
+
+
+def role_revoke(role_name, username):
+    role, user = _get_role_user_details(role_name, username)
+    if role and user:
+        Profile.query.all()
+        profile = Profile.query.filter_by(user_id=user.id).first()
+        if role in profile.role:
+            profile.role.remove(role)
+            db.session.commit()
+            return
+        return show_error(f'Такой роли: {role_name} нет у пользователя: {username}', 404)
+    return show_error('Нет такой роли или пользователя', 404)
+
+
+def user_sets():
+    user_login = get_jwt_identity()
+    body = get_jwt()
+    jwt_id = body.get('jti')
+    if is_token_revoked(jwt_id):
+        return show_error('token был отозван', 401)
+    user = is_user_exists(user_login)
+    if not user:
+        return show_error('Такой пользователь не существует!', 404)
+    return user, jwt_id
+
+
+def post_load(obj, request):
+    if not request.json:
+        return abort(make_response(jsonify({"msg": 'Пустой запрос'}), 400))
+    try:
+        entity = obj(**request.json)
+    except ValidationError as e:
+        return show_error(e.errors(), 400)
+    return entity
+
+
+def admin_required():
+    def decorator(f):
+        @wraps(f)
+        @jwt_required()
+        def wrapper(*args, **kwargs):
+            user, jwt_id = user_sets()
+            profile = get_profile(user)
+            if not set(profile['role']) & set(ADMIN_ROLES):
+                return jsonify({"msg": 'Требуются административные права'}), 403
+            return f(*args, **kwargs)
+        return wrapper
+    return decorator

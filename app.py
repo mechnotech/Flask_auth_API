@@ -1,28 +1,13 @@
-from flask import Flask, abort, make_response
-from flask import jsonify
+from flask import Flask
 from flask import request
 from flask.views import MethodView
 from flask_jwt_extended import (
     JWTManager,
-    get_jwt_identity,
-    jwt_required,
-    get_jwt,
 )
-from pydantic.error_wrappers import ValidationError
 
-from dbs.db import db, init_db
-from settings import ACCESS_EXPIRES, REFRESH_EXPIRES
-from utils.models import UserSet, LoginSet, ProfileSet
-from utils.tools import (
-    is_user_exists,
-    get_user_tokens,
-    is_password_correct,
-    register_user_data,
-    to_cache_expired,
-    is_token_revoked,
-    update_jwt_db,
-    do_checkout, get_profile, update_profile,
-)
+from dbs.db import init_db
+from utils.models import LoginSet, RoleUser
+from utils.tools import *
 
 app = Flask(__name__)
 init_db(app)
@@ -38,12 +23,7 @@ jwt = JWTManager(app)
 
 @app.route("/api/v1/login", methods=["POST"])
 def login():
-    if not request.json:
-        return jsonify({"msg": 'Пустой запрос'}), 400
-    try:
-        user = LoginSet(**request.json)
-    except ValidationError as e:
-        return jsonify({"msg": e.errors()}), 400
+    user = post_load(obj=LoginSet, request=request)
     db_user = is_user_exists(user.login)
     if not db_user:
         return jsonify({"msg": 'Такой пользователь не существует!'}), 404
@@ -56,40 +36,21 @@ def login():
 
 @app.route("/api/v1/registration", methods=["POST"])
 def registration():
-    if not request.json:
-        return jsonify({"msg": 'Пустой запрос'}), 400
-    try:
-        user = UserSet(**request.json)
-    except ValidationError as e:
-        return jsonify({"msg": e.errors()}), 400
-    if is_user_exists(user, check_email=True):
+    candidate = post_load(obj=UserSet, request=request)
+    user = is_user_exists(candidate, check_email=True)
+    if user:
         return jsonify({"msg": 'Пользователь с таким login или email уже создан!'}), 409
-    access_token, refresh_token = get_user_tokens(user.login)
-    register_user_data(refresh_token, user)
-    return jsonify(access_token=access_token, refresh_token=refresh_token), 201
-
-
-def user_sets():
-    user_login = get_jwt_identity()
-    body = get_jwt()
-    role = body.get('role')
-    jwt_id = body.get('jti')
-    if is_token_revoked(jwt_id):
-        return abort(make_response(jsonify({"msg": 'Refresh-token был отозван'}), 401))
-    user = is_user_exists(user_login)
-    if not user:
-        return abort(make_response(jsonify({"msg": 'Такой пользователь не существует!'}), 404))
-    return user, role, jwt_id
+    access_token, refresh_token = get_user_tokens(candidate)
+    register_user_data(refresh_token, candidate)
+    return {'msg': f'Пользователь {candidate.login} создан'}, 201
 
 
 @app.route("/api/v1/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
-    user, role, jwt_id = user_sets()
+    user, jwt_id = user_sets()
     to_cache_expired(jwt_id=jwt_id)
-    if not role:
-        role = 'user'
-    access_token, refresh_token = get_user_tokens(user, role=role)
+    access_token, refresh_token = get_user_tokens(user)
     update_jwt_db(user, refresh_token)
     return jsonify(access_token=access_token, refresh_token=refresh_token)
 
@@ -97,41 +58,91 @@ def refresh():
 @app.route("/api/v1/logout", methods=["GET"])
 @jwt_required()
 def logout():
-    user, _, jwt_id = user_sets()
+    user, jwt_id = user_sets()
     do_checkout(user, info=str(request.user_agent), status='logout', jwt_id=jwt_id)
-    return jsonify(logout_as=user.login), 200
+    return {'logout_as': user.login}
+
+
+@app.route("/api/v1/users/history", methods=["GET"])
+@jwt_required()
+def logins():
+    user, jwt_id = user_sets()
+    logins_list = get_logins(user)
+    return {'msg': logins_list}
+
+
+@app.route("/api/v1/role/admit", methods=["POST"])
+@admin_required()
+def role_admit():
+    role_for_user = post_load(obj=RoleUser, request=request)
+    admit_role(role_for_user)
+    return {'msg': f'Роль {role_for_user.role} назначена пользователю {role_for_user.user}'}, 201
+
+
+@app.route('/api/v1/role/<string:role>/<string:username>', methods=['DELETE'])
+@admin_required()
+def revoke_role(role, username):
+    role_revoke(role, username)
+    return {'msg': f'Роль {role} удалена у пользователя {username}'}
 
 
 class CabinetAPI(MethodView):
     @jwt_required()
     def get(self):
-        user, _, jwt_id = user_sets()
+        user, _ = user_sets()
         profile = get_profile(user)
-        return profile.json()
+        return {'msg': profile}
 
     @jwt_required()
     def post(self):
-        user, role, jwt_id = user_sets()
-        if not request.json:
-            return jsonify({"msg": 'Пустой запрос'}), 400
-        try:
-            profile = ProfileSet(**request.json)
-        except ValidationError as e:
-            return jsonify({"msg": e.errors()}), 400
+        user, _ = user_sets()
+        profile = post_load(obj=ProfileSet, request=request)
         update_profile(profile, user)
         return jsonify({'msg': 'Профиль обновлен'})
 
 
-app.add_url_rule('/api/v1/users/me', view_func=CabinetAPI.as_view(name='Profile'), methods=['GET', 'POST'])
+class RoleAPI(MethodView):
+    @admin_required()
+    def get(self):
+        roles = roles_list()
+        return {'roles': roles}
+
+    @admin_required()
+    def post(self):
+        user, _ = user_sets()
+        role_name = post_load(obj=RoleSet, request=request)
+        set_role(role_name.role)
+        return {'created_role': role_name.role}
 
 
-@app.route("/api/v1/protected", methods=["GET"])
-@jwt_required()
-def protected():
-    current_user, _, jwt_id = user_sets()
-    if is_token_revoked(jwt_id):
-        return jsonify({"msg": 'Refresh-token был отозван'}), 401
-    return jsonify(logged_in_as=current_user.login), 200
+class RoleChangeAPI(MethodView):
+    @admin_required()
+    def patch(self, role):
+        role_new = post_load(obj=RoleSet, request=request)
+        update_role(role, role_new)
+        return {'msg': 'Роль обновлена'}
+
+    @admin_required()
+    def delete(self, role):
+        delete_role(role)
+        return {'msg': 'Роль удалена'}
+
+
+app.add_url_rule(
+    '/api/v1/users/me',
+    view_func=CabinetAPI.as_view(name='Profile'),
+    methods=['GET', 'POST']
+)
+app.add_url_rule(
+    '/api/v1/role/<string:role>',
+    view_func=RoleChangeAPI.as_view(name='RoleChange'),
+    methods=['PATCH', 'DELETE']
+)
+app.add_url_rule(
+    '/api/v1/role',
+    view_func=RoleAPI.as_view(name='Role'),
+    methods=['GET', 'POST']
+)
 
 
 if __name__ == '__main__':

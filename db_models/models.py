@@ -6,6 +6,12 @@ from dbs.db import db
 
 SALT = os.getenv('SALT', '8784dg4rgw44fe73sdf7r72s7')
 
+roles_related = db.Table(
+    'roles_related',
+    db.Column('profile_id', UUID(as_uuid=True), db.ForeignKey('profiles.id'), primary_key=True),
+    db.Column('role_id', UUID(as_uuid=True), db.ForeignKey('roles.id'), primary_key=True)
+)
+
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -21,6 +27,16 @@ class User(db.Model):
         return f'<User {self.login}>'
 
 
+class Role(db.Model):
+    __tablename__ = 'roles'
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    role = db.Column(db.String(100), default='user', unique=True, nullable=False)
+
+    
+    def __repr__(self):
+        return f'{self.role}'
+
+
 class Profile(db.Model):
     __tablename__ = 'profiles'
 
@@ -28,10 +44,14 @@ class Profile(db.Model):
     user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
     first_name = db.Column(db.String(128))
     last_name = db.Column(db.String(128))
-    role = db.Column(db.String(100), default='user')
+    role = db.relationship('Role', secondary=roles_related, lazy='subquery',
+                           backref=db.backref('profiles', lazy=True))
     bio = db.Column(db.String(10000))
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+
+    def add_role(self, role):
+        self.role.append(role)
 
     def __repr__(self):
         return f'<Profile user {self.user_id}>'
