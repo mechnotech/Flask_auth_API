@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 )
 
 from dbs.db import init_db
+from settings import SECRET_KEY, config
 from utils.models import LoginSet, RoleUser
 from utils.tools import *
 
@@ -14,8 +15,7 @@ init_db(app)
 app.app_context().push()
 db.create_all()
 
-# Setup the Flask-JWT-Extended extension
-app.config['JWT_SECRET_KEY'] = 'Eww3ssefw2931dfsd'  # Change this!
+app.config['JWT_SECRET_KEY'] = SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXPIRES
 jwt = JWTManager(app)
@@ -148,5 +148,5 @@ app.add_url_rule(
 if __name__ == '__main__':
     app.run(
         host='0.0.0.0',
-        port=5000,
+        port=config.auth_port,
     )

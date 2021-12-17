@@ -3,6 +3,7 @@ import os
 import uuid
 from sqlalchemy.dialects.postgresql import UUID
 from dbs.db import db
+from settings import SALT
 
 SALT = os.getenv('SALT', '8784dg4rgw44fe73sdf7r72s7')
 
