@@ -2,20 +2,21 @@
 
 ### Для запуска нужно:
 #### Создать окружение
+```
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-
+```
 #### Запустить контейнеры с Redis и Postgres
-docker-compose -f dev-compose.yaml up -d
+`docker-compose -f dev-compose.yaml up -d`
 
 #### При первом запуске (создать первичного пользователя (admin, password) и назначить ему админскую роль)
-python create_admin.py
+`python create_admin.py`
 
 #### Запуск приложения:
-python pywsgi.py
+`python pywsgi.py`
 
-Описание работы этого API доступно после запуска будет доступно по адресу localhost:5000/swagger/
+Описание работы этого API доступно после запуска будет доступно по адресу http://localhost:5000/swagger/
 
 Тесты (без тестов, только коллекции) для Postman в папке project_description для Auth API и для Fast API
 
