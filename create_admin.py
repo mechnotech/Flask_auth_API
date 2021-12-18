@@ -1,5 +1,4 @@
 from app import app
-from db_models.models import User
 from dbs.db import db, init_db
 # Запустить один раз после инсталляции!
 # Подготавливаем контекст и создаём таблицы
