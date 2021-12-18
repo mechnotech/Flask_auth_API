@@ -1,0 +1,195 @@
+{
+	"info": {
+		"_postman_id": "b4b09ce3-6715-4bf7-aa1d-9048f9abffa6",
+		"name": "Fast API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Фильм - запрос по uuid жанра, сортировка + пагинация",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://0.0.0.0:8000/api/v1/film/?sort=-imdb_rating&filter[genre]=3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff&page[size]=5&page[number]=1",
+					"protocol": "http",
+					"host": [
+						"0",
+						"0",
+						"0",
+						"0"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"film",
+						""
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "-imdb_rating"
+						},
+						{
+							"key": "filter[genre]",
+							"value": "3d8d9bf5-0d90-4353-88ba-4ccc5d2c07ff"
+						},
+						{
+							"key": "page[size]",
+							"value": "5"
+						},
+						{
+							"key": "page[number]",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Фильм - прямой запрос по uuid",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/api/v1/film/ec07f763-f2a1-49b5-b137-2e31f64cb090",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"film",
+						"ec07f763-f2a1-49b5-b137-2e31f64cb090"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Фильм запрос + пагинация",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/api/v1/film/search?query=forest&page[number]=2&page[size]=10",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"film",
+						"search"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "forest"
+						},
+						{
+							"key": "page[number]",
+							"value": "2"
+						},
+						{
+							"key": "page[size]",
+							"value": "10"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Жанр - прямой запрос по uuid",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/api/v1/genre/56b541ab-4d66-4021-8708-397762bff2d4",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"genre",
+						"56b541ab-4d66-4021-8708-397762bff2d4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Жанр - список + пагинация",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:8000/api/v1/genre?page[size]=5&page[number]=2",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"api",
+						"v1",
+						"genre"
+					],
+					"query": [
+						{
+							"key": "page[size]",
+							"value": "5"
+						},
+						{
+							"key": "page[number]",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Персона - прямой запрос по uuid",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "Персона - список + пагинация",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "Персоны - фильмы где персона writer",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		},
+		{
+			"name": "Персона - поиск + пагинация",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		}
+	]
+}

@@ -19,6 +19,7 @@ config = AuthSettings()
 ACCESS_EXPIRES = timedelta(hours=int(os.getenv('ACCESS_EXPIRES_HOURS', 1)))
 REFRESH_EXPIRES = timedelta(days=int(os.getenv('REFRESH_EXPIRES_DAYS', 1)))
 ADMIN_ROLES = ['admin', 'moderator']
+PRIVILEGED_USERS_ROLES = ['subscriber', 'bonus', 'trial']
 SECRET_KEY = os.getenv('SECRET_KEY', 'Eww3ssefw2931dfsd')
 SALT = os.getenv('SALT', '8784dg4rgw44fe73sdf7r72s7')
 

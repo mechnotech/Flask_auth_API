@@ -1,3 +1,4 @@
+from flasgger import Swagger
 from flask import Flask
 from flask import request
 from flask.views import MethodView
@@ -9,18 +10,13 @@ from dbs.db import init_db
 from settings import SECRET_KEY, config
 from utils.models import LoginSet, RoleUser
 from utils.tools import *
-from flasgger import Swagger, swag_from
 
 app = Flask(__name__)
 init_db(app)
 app.app_context().push()
 db.create_all()
 
-# app.config['SWAGGER'] = {
-#     'title': 'My API',
-#     'uiversion': 3,
-#     "specs_route": "/swagger/"
-# }
+
 app.config['SWAGGER'] = {
     'title': 'OA3 Callbacks',
     'openapi': '3.0.2',
@@ -46,7 +42,7 @@ def login():
     return jsonify(access_token=access_token, refresh_token=refresh_token)
 
 
-@app.route("/api/v1/registration", methods=["POST"])
+@app.route("/api/v1/registration/", methods=["POST"])
 def registration():
     candidate = post_load(obj=UserSet, request=request)
     user = is_user_exists(candidate, check_email=True)
@@ -57,7 +53,7 @@ def registration():
     return {'msg': f'Пользователь {candidate.login} создан'}, 201
 
 
-@app.route("/api/v1/refresh", methods=["POST"])
+@app.route("/api/v1/refresh/", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
     user, jwt_id = user_sets()
@@ -67,7 +63,7 @@ def refresh():
     return jsonify(access_token=access_token, refresh_token=refresh_token)
 
 
-@app.route("/api/v1/logout", methods=["GET"])
+@app.route("/api/v1/logout/", methods=["GET"])
 @jwt_required()
 def logout():
     user, jwt_id = user_sets()
@@ -75,7 +71,7 @@ def logout():
     return {'logout_as': user.login}
 
 
-@app.route("/api/v1/users/history", methods=["GET"])
+@app.route("/api/v1/users/history/", methods=["GET"])
 @jwt_required()
 def logins():
     user, jwt_id = user_sets()
@@ -83,7 +79,7 @@ def logins():
     return {'msg': logins_list}
 
 
-@app.route("/api/v1/role/admit", methods=["POST"])
+@app.route("/api/v1/role/admit/", methods=["POST"])
 @admin_required()
 def role_admit():
     role_for_user = post_load(obj=RoleUser, request=request)
@@ -91,7 +87,7 @@ def role_admit():
     return {'msg': f'Роль {role_for_user.role} назначена пользователю {role_for_user.user}'}, 201
 
 
-@app.route('/api/v1/role/<string:role>/<string:username>', methods=['DELETE'])
+@app.route('/api/v1/role/<string:role>/<string:username>/', methods=['DELETE'])
 @admin_required()
 def revoke_role(role, username):
     role_revoke(role, username)
@@ -146,12 +142,12 @@ app.add_url_rule(
     methods=['GET', 'POST']
 )
 app.add_url_rule(
-    '/api/v1/role/<string:role>',
+    '/api/v1/role/<string:role>/',
     view_func=RoleChangeAPI.as_view(name='RoleChange'),
     methods=['PATCH', 'DELETE']
 )
 app.add_url_rule(
-    '/api/v1/role',
+    '/api/v1/role/',
     view_func=RoleAPI.as_view(name='Role'),
     methods=['GET', 'POST']
 )
