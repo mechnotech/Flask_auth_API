@@ -20,6 +20,8 @@ info:
     
     # Как работает это API а связке с Movies API
     
+    ![](/static/interaction.png)
+    
     1. К **Movies API** приходит запрос от пользователя
     2. **Movies API** считает пользователя **Анонимом** если в запросе нет заголовка **Authorization** Bearer JWT-assess token.
     3. Если токен в заголовке есть - делает get запрос к эндпоинту **Auth API** `/users/me/` с этим же заголовком.
@@ -140,9 +142,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ValidationError'
       security:
-        - jwt_auth:
-              - read:admin,user
-              - write:admin,user
+        - bearerAuth: [ ]
 
   /auth/logout/:
     get:
@@ -177,9 +177,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/User'
       security:
-      - jwt_auth:
-        - read:admin,user
-        - write:admin,user
+        - bearerAuth: [ ]
     patch:
       tags:
         - USERS
@@ -211,9 +209,7 @@ paths:
 
 
       security:
-      - jwt_auth:
-        - read:admin,user
-        - write:admin,user
+        - bearerAuth: [ ]
 
   /users/history/:
     get:
@@ -237,9 +233,7 @@ paths:
         401:
           description: Необходим JWT токен
       security:
-      - jwt_auth:
-        - read:admin,user
-        - write:admin,user
+        - bearerAuth: [ ]
 
   /role/:
     get:
@@ -262,9 +256,7 @@ paths:
         403:
           description: Нет прав доступа
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
     post:
       tags:
         - ROLES
@@ -294,19 +286,17 @@ paths:
         403:
           description: Нет прав доступа
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
 
-  /role/{uuid}:
+  /role/{role}:
     parameters:
-      - name: uuid
+      - name: role
         in: path
         required: true
-        description: Роль (UUID)
+        description: Роль (role)
         schema:
           type: string
-          format: uuid
+
     delete:
       tags:
         - ROLES
@@ -323,9 +313,7 @@ paths:
         404:
           description: Роль не найдена
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
     patch:
       tags:
         - ROLES
@@ -337,9 +325,9 @@ paths:
           application/json:
             schema:
               required:
-                - uuid
+                - role
               properties:
-                uuid:
+                role:
                   type: string
       responses:
         200:
@@ -363,9 +351,7 @@ paths:
         404:
           description: Роль не найдена
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
 
   /role/admit/:
     post:
@@ -384,10 +370,10 @@ paths:
               properties:
                 role:
                   type: string
-                  format: uuid
+
                 user:
                   type: string
-                  format: uuid
+
 
       responses:
         200:
@@ -406,26 +392,24 @@ paths:
           description: Нет такой роли или пользователя
 
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
 
-  /role/{role-uuid}/{user-uuid}/:
+  /role/{role}/{user}/:
     parameters:
-      - name: role-uuid
+      - name: role
         in: path
         required: true
-        description: Роль (UUID)
+        description: Роль (role)
         schema:
           type: string
-          format: uuid
-      - name: user-uuid
+
+      - name: user
         in: path
         required: true
-        description: Пользователь (UUID)
+        description: Пользователь (login)
         schema:
           type: string
-          format: uuid
+
     delete:
       tags:
           - ROLES
@@ -449,9 +433,7 @@ paths:
           description: Нет такой роли или пользователя
 
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
 
 
 
@@ -518,7 +500,10 @@ components:
 
 
   securitySchemes:
-    jwt_auth:
-      type: apiKey
-      name: Bearer
-      in: header
+      bearerAuth: # arbitrary name for the security scheme
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+
+  security:
+    - bearerAuth: [ ]

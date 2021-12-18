@@ -9,19 +9,31 @@ from dbs.db import init_db
 from settings import SECRET_KEY, config
 from utils.models import LoginSet, RoleUser
 from utils.tools import *
+from flasgger import Swagger, swag_from
 
 app = Flask(__name__)
 init_db(app)
 app.app_context().push()
 db.create_all()
 
+# app.config['SWAGGER'] = {
+#     'title': 'My API',
+#     'uiversion': 3,
+#     "specs_route": "/swagger/"
+# }
+app.config['SWAGGER'] = {
+    'title': 'OA3 Callbacks',
+    'openapi': '3.0.2',
+    "specs_route": "/swagger/"
+}
+swagger = Swagger(app, template_file='project_description/openapi.yaml')
 app.config['JWT_SECRET_KEY'] = SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXPIRES
 jwt = JWTManager(app)
 
 
-@app.route("/api/v1/login", methods=["POST"])
+@app.route("/api/v1/login/", methods=["POST"])
 def login():
     user = post_load(obj=LoginSet, request=request)
     db_user = is_user_exists(user.login)
@@ -129,7 +141,7 @@ class RoleChangeAPI(MethodView):
 
 
 app.add_url_rule(
-    '/api/v1/users/me',
+    '/api/v1/users/me/',
     view_func=CabinetAPI.as_view(name='Profile'),
     methods=['GET', 'POST']
 )
