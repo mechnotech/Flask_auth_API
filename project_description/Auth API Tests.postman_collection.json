@@ -1,0 +1,413 @@
+{
+	"info": {
+		"_postman_id": "4a272fb1-3b37-4ce8-b249-7f9dcaf4e089",
+		"name": "Auth API Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Register new user and get JWT",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"mech\",\n    \"password\": \"test\",\n    \"email\": \"mc@ya.ru\",\n    \"some\" : \"foo\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/registration",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"registration"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login and get JWT",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"content-type": true
+				}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTU1ODg5MSwianRpIjoiZjEzMjBmNjMtNGM3My00YWE0LTliNTYtNzdhMmJiYTc1OTgyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6InRlc3QiLCJuYmYiOjE2Mzk1NTg4OTEsImV4cCI6MTYzOTU1OTc5MX0.8thZudCZF8WUUVQnGx6mp7v2__VQ0lHF4OqEJrvp9Ig",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"login\": \"mech\",\n    \"password\": \"test\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:5000/api/v1/login",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Refresh - get new JWT",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY0MTM3NywianRpIjoiOTkyYzI0YWEtNjY0NC00MmY5LWFmYzQtYmEzYTJlMWE3NzBkIiwidHlwZSI6InJlZnJlc2giLCJzdWIiOiJtZWNoIiwibmJmIjoxNjM5NjQxMzc3LCJleHAiOjE2Mzk3Mjc3NzcsInJvbGUiOiJ1c2VyIn0.-rcfqpGMht1MP3iXvFleiu6khuelhMmHMB6liZ0TJs0",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/refresh",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"refresh"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profile Look",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/users/me",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Profile update",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/users/me",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List of logins",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/users/me",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Role",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/users/me",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Admit Role for user",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/users/me",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "List of Roles",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/users/me",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"users",
+						"me"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Change Role",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"role\": \"super\"\n}"
+				},
+				"url": {
+					"raw": "localhost:5000/api/v1/role/user/",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"role",
+						"user",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete role",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/role/super",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"role",
+						"super"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Revoke user role",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "localhost:5000/api/v1/role/{$admin}/{$user}",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"v1",
+						"role",
+						"{$admin}",
+						"{$user}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Logout and revoke JWT tokens",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": null
+			},
+			"response": []
+		}
+	]
+}

@@ -14,11 +14,13 @@ info:
     5. Узнать историю посещений пользователь может тут `/users/history/`
     
     # Пользовательские роли
-    - **Аноним** — может просматривать детальную информацию обо всех фильмах за исключением новинок (за последние 3 года).
-    - **Аутентифицированный пользователь** — может, как и **Аноним**, просматривать все фильмы без исключений, менять свои пароль, email и логин, просматривать историю посещений.
+    - **Аноним** — может просматривать детальную информацию обо всех фильмах за исключением (в качестве примера ограничения) детального описания фильма.
+    - **Аутентифицированный пользователь** — может, как и **Аноним**, просматривать все фильмы за исключением (в качестве примера ограничения) детального описания фильма, заполнять и просматривать свой профиль, просматривать историю посещений.
     - **Администратор** — может создавать, изменять и удалять роли пользователей, назначать их пользователям и снимать их. Просматривать список ролей.
     
     # Как работает это API а связке с Movies API
+    
+    ![](/static/interaction.png)
     
     1. К **Movies API** приходит запрос от пользователя
     2. **Movies API** считает пользователя **Анонимом** если в запросе нет заголовка **Authorization** Bearer JWT-assess token.
@@ -125,19 +127,7 @@ paths:
     post:
       tags:
         - AUTH
-      description: Получить JWT-токены в обмен на JWT-refresh token Права доступа:**Требуется JWT-refresh token**
-      requestBody:
-        content:
-          application/json:
-            schema:
-              required:
-                - JWT-refresh-token
-              properties:
-                JWT-refresh-token:
-                  type: string
-                  format: JWT
-                  writeOnly: true
-
+      description: Получить JWT-токены в обмен на JWT-refresh token Права доступа:**Аутентифицированный пользователь**
       responses:
         200:
           content:
@@ -151,6 +141,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+      security:
+        - bearerAuth: [ ]
 
   /auth/logout/:
     get:
@@ -185,9 +177,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/User'
       security:
-      - jwt_auth:
-        - read:admin,user
-        - write:admin,user
+        - bearerAuth: [ ]
     patch:
       tags:
         - USERS
@@ -219,9 +209,7 @@ paths:
 
 
       security:
-      - jwt_auth:
-        - read:admin,user
-        - write:admin,user
+        - bearerAuth: [ ]
 
   /users/history/:
     get:
@@ -245,9 +233,7 @@ paths:
         401:
           description: Необходим JWT токен
       security:
-      - jwt_auth:
-        - read:admin,user
-        - write:admin,user
+        - bearerAuth: [ ]
 
   /role/:
     get:
@@ -270,9 +256,7 @@ paths:
         403:
           description: Нет прав доступа
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
     post:
       tags:
         - ROLES
@@ -302,19 +286,17 @@ paths:
         403:
           description: Нет прав доступа
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
 
-  /role/{uuid}:
+  /role/{role}/:
     parameters:
-      - name: uuid
+      - name: role
         in: path
         required: true
-        description: Роль (UUID)
+        description: Роль (role)
         schema:
           type: string
-          format: uuid
+
     delete:
       tags:
         - ROLES
@@ -331,9 +313,7 @@ paths:
         404:
           description: Роль не найдена
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
     patch:
       tags:
         - ROLES
@@ -345,9 +325,9 @@ paths:
           application/json:
             schema:
               required:
-                - uuid
+                - role
               properties:
-                uuid:
+                role:
                   type: string
       responses:
         200:
@@ -371,9 +351,7 @@ paths:
         404:
           description: Роль не найдена
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
 
   /role/admit/:
     post:
@@ -392,10 +370,10 @@ paths:
               properties:
                 role:
                   type: string
-                  format: uuid
+
                 user:
                   type: string
-                  format: uuid
+
 
       responses:
         200:
@@ -414,26 +392,24 @@ paths:
           description: Нет такой роли или пользователя
 
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
 
-  /role/{role-uuid}/{user-uuid}/:
+  /role/{role}/{user}/:
     parameters:
-      - name: role-uuid
+      - name: role
         in: path
         required: true
-        description: Роль (UUID)
+        description: Роль (role)
         schema:
           type: string
-          format: uuid
-      - name: user-uuid
+
+      - name: user
         in: path
         required: true
-        description: Пользователь (UUID)
+        description: Пользователь (login)
         schema:
           type: string
-          format: uuid
+
     delete:
       tags:
           - ROLES
@@ -457,9 +433,7 @@ paths:
           description: Нет такой роли или пользователя
 
       security:
-      - jwt_auth:
-        - read:admin
-        - write:admin
+        - bearerAuth: [ ]
 
 
 
@@ -526,7 +500,10 @@ components:
 
 
   securitySchemes:
-    jwt_auth:
-      type: apiKey
-      name: Bearer
-      in: header
+      bearerAuth: # arbitrary name for the security scheme
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
+
+  security:
+    - bearerAuth: [ ]
