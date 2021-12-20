@@ -1,8 +1,8 @@
 import os
+
 import sys
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append(BASE_DIR)
+sys.path = ['', '..'] + sys.path[1:]
 
 from settings import DATABASE_URI
 from logging.config import fileConfig

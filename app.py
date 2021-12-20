@@ -2,9 +2,7 @@ from flasgger import Swagger
 from flask import Flask
 from flask import request
 from flask.views import MethodView
-from flask_jwt_extended import (
-    JWTManager,
-)
+from flask_jwt_extended import JWTManager
 
 from dbs.db import init_db
 from settings import SECRET_KEY, config
