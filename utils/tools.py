@@ -18,7 +18,7 @@ from werkzeug.exceptions import abort
 
 from db_models.models import User, Profile, JwtRefresh, Login, Role
 from dbs.db import db, cache
-from settings import ACCESS_EXPIRES, REFRESH_EXPIRES, ADMIN_ROLES, SALT
+from settings import JWT_ACCESS_TOKEN_EXPIRES, JWT_REFRESH_TOKEN_EXPIRES, ADMIN_ROLES, SALT
 from utils.models import UserSet, ProfileSet, LogSet, RoleSet
 
 
@@ -65,9 +65,9 @@ def to_cache_expired(jwt_id: str, token_type='refresh'):
     :return:
     """
     if token_type == 'refresh':
-        ttl = int(REFRESH_EXPIRES.total_seconds())
+        ttl = int(JWT_REFRESH_TOKEN_EXPIRES.total_seconds())
     else:
-        ttl = int(ACCESS_EXPIRES.total_seconds())
+        ttl = int(JWT_ACCESS_TOKEN_EXPIRES.total_seconds())
     cache.setex(jwt_id, ttl, 1)
 
 

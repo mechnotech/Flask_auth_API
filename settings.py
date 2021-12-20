@@ -16,10 +16,16 @@ class AuthSettings(BaseSettings):
 
 
 config = AuthSettings()
-DATABASE_URI = f'postgresql://{config.pg_user}:{config.pg_pass}@{config.db_host}:{config.db_port}/{config.db_name}'
-ACCESS_EXPIRES = timedelta(hours=int(os.getenv('ACCESS_EXPIRES_HOURS', 1)))
-REFRESH_EXPIRES = timedelta(days=int(os.getenv('REFRESH_EXPIRES_DAYS', 1)))
+SQLALCHEMY_DATABASE_URI = f'postgresql://{config.pg_user}:' \
+                          f'{config.pg_pass}@{config.db_host}:{config.db_port}/{config.db_name}'
+JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=int(os.getenv('ACCESS_EXPIRES_HOURS', 1)))
+JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=int(os.getenv('REFRESH_EXPIRES_DAYS', 1)))
 ADMIN_ROLES = ['admin', 'moderator']
 PRIVILEGED_USERS_ROLES = ['subscriber', 'bonus', 'trial']
-SECRET_KEY = os.getenv('SECRET_KEY', 'Eww3ssefw2931dfsd')
+JWT_SECRET_KEY = os.getenv('SECRET_KEY', 'Eww3ssefw2931dfsd')
 SALT = os.getenv('SALT', '8784dg4rgw44fe73sdf7r72s7')
+SWAGGER = {
+    'title': 'OA3 Callbacks',
+    'openapi': '3.0.2',
+    "specs_route": "/swagger/"
+}

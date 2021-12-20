@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import redis
 from sqlalchemy import MetaData
 
-from settings import config, DATABASE_URI
+from settings import config
 
 convention = {
     'all_column_names': lambda constraint, table: '_'.join([
@@ -26,5 +26,4 @@ cache = redis.Redis(host=config.redis_host, port=config.redis_port, db=0)
 
 
 def init_db(app: Flask):
-    app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
     db.init_app(app)

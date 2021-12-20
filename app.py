@@ -5,28 +5,17 @@ from flask.views import MethodView
 from flask_jwt_extended import JWTManager
 
 from dbs.db import init_db
-from settings import SECRET_KEY, config
+from settings import config
 from utils.models import LoginSet, RoleUser
 from utils.tools import *
 
 app = Flask(__name__)
+app.config.from_pyfile('settings.py', silent=True)
 init_db(app)
 app.app_context().push()
 
-
-
-app.config['SWAGGER'] = {
-    'title': 'OA3 Callbacks',
-    'openapi': '3.0.2',
-    "specs_route": "/swagger/"
-}
 swagger = Swagger(app, template_file='project_description/openapi.yaml')
-app.config['JWT_SECRET_KEY'] = SECRET_KEY
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXPIRES
 jwt = JWTManager(app)
-
-
 
 
 @app.route("/api/v1/auth/login/", methods=["POST"])
@@ -151,7 +140,6 @@ app.add_url_rule(
     view_func=RoleAPI.as_view(name='Role'),
     methods=['GET', 'POST']
 )
-
 
 if __name__ == '__main__':
     app.run(

@@ -1,16 +1,10 @@
 import os
 
-import sys
-
-sys.path = ['', '..'] + sys.path[1:]
-
-from settings import DATABASE_URI
 from logging.config import fileConfig
 
+from alembic import context
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
-
-from alembic import context
 
 from db_models import models
 
@@ -52,7 +46,7 @@ def run_migrations_offline():
     script output.
 
     """
-    url = DATABASE_URI  # config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
