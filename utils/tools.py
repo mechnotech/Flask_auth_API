@@ -1,4 +1,5 @@
 import hmac
+from http import HTTPStatus
 from functools import wraps
 from typing import Tuple, Union, Optional, Any
 
@@ -150,9 +151,9 @@ def _get_role(role_name: str, check_exist=False, check_missing=False):
     Role.query.all()
     role = Role.query.filter_by(role=role_name).one_or_none()
     if check_missing and not role:
-        show_error(f'Такой роли: {role} нет', 404)
+        show_error(f'Такой роли: {role} нет', HTTPStatus.NOT_FOUND)
     if check_exist and role:
-        show_error(f'Роль с таким названием уже существует!', 400)
+        show_error(f'Роль с таким названием уже существует!', HTTPStatus.BAD_REQUEST)
     return role
 
 
@@ -198,7 +199,7 @@ def admit_role(user_role):
         profile.add_role(role=role)
         db.session.commit()
         return
-    return show_error('Нет такой роли или пользователя', 404)
+    return show_error('Нет такой роли или пользователя', HTTPStatus.NOT_FOUND)
 
 
 def role_revoke(role_name, username):
@@ -210,8 +211,8 @@ def role_revoke(role_name, username):
             profile.role.remove(role)
             db.session.commit()
             return
-        return show_error(f'Такой роли: {role_name} нет у пользователя: {username}', 404)
-    return show_error('Нет такой роли или пользователя', 404)
+        return show_error(f'Такой роли: {role_name} нет у пользователя: {username}', HTTPStatus.NOT_FOUND)
+    return show_error('Нет такой роли или пользователя', HTTPStatus.NOT_FOUND)
 
 
 def user_sets():
@@ -219,20 +220,20 @@ def user_sets():
     body = get_jwt()
     jwt_id = body.get('jti')
     if is_token_revoked(jwt_id):
-        return show_error('token был отозван', 401)
+        return show_error('token был отозван', HTTPStatus.UNAUTHORIZED)
     user = is_user_exists(user_login)
     if not user:
-        return show_error('Такой пользователь не существует!', 404)
+        return show_error('Такой пользователь не существует!', HTTPStatus.NOT_FOUND)
     return user, jwt_id
 
 
 def post_load(obj, request):
     if not request.json:
-        return abort(make_response(jsonify({"msg": 'Пустой запрос'}), 400))
+        return abort(make_response(jsonify({"msg": 'Пустой запрос'}), HTTPStatus.BAD_REQUEST))
     try:
         entity = obj(**request.json)
     except ValidationError as e:
-        return show_error(e.errors(), 400)
+        return show_error(e.errors(), HTTPStatus.BAD_REQUEST)
     return entity
 
 
@@ -244,7 +245,7 @@ def admin_required():
             user, jwt_id = user_sets()
             profile = get_profile(user)
             if not set(profile['role']) & set(ADMIN_ROLES):
-                return jsonify({"msg": 'Требуются административные права'}), 403
+                return jsonify({"msg": 'Требуются административные права'}), HTTPStatus.FORBIDDEN
             return f(*args, **kwargs)
         return wrapper
     return decorator

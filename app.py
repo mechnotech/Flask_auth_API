@@ -34,9 +34,9 @@ def login():
     user = post_load(obj=LoginSet, request=request)
     db_user = is_user_exists(user.login)
     if not db_user:
-        return jsonify({"msg": 'Такой пользователь не существует!'}), 404
+        return jsonify({"msg": 'Такой пользователь не существует!'}), HTTPStatus.NOT_FOUND
     if not is_password_correct(hashed_password=db_user.password, password_to_check=user.password):
-        return jsonify({"msg": 'Пароль неверный!'}), 403
+        return jsonify({"msg": 'Пароль неверный!'}), HTTPStatus.UNAUTHORIZED
     access_token, refresh_token = get_user_tokens(db_user)
     do_checkout(db_user, info=str(request.user_agent), refresh_token=refresh_token)
     return jsonify(access_token=access_token, refresh_token=refresh_token)
@@ -47,10 +47,10 @@ def registration():
     candidate = post_load(obj=UserSet, request=request)
     user = is_user_exists(candidate, check_email=True)
     if user:
-        return jsonify({"msg": 'Пользователь с таким login или email уже создан!'}), 409
+        return jsonify({"msg": 'Пользователь с таким login или email уже создан!'}), HTTPStatus.CONFLICT
     access_token, refresh_token = get_user_tokens(candidate)
     register_user_data(refresh_token, candidate)
-    return {'msg': f'Пользователь {candidate.login} создан'}, 201
+    return {'msg': f'Пользователь {candidate.login} создан'}, HTTPStatus.CREATED
 
 
 @app.route("/api/v1/refresh/", methods=["POST"])
@@ -84,7 +84,7 @@ def logins():
 def role_admit():
     role_for_user = post_load(obj=RoleUser, request=request)
     admit_role(role_for_user)
-    return {'msg': f'Роль {role_for_user.role} назначена пользователю {role_for_user.user}'}, 201
+    return {'msg': f'Роль {role_for_user.role} назначена пользователю {role_for_user.user}'}, HTTPStatus.CREATED
 
 
 @app.route('/api/v1/role/<string:role>/<string:username>/', methods=['DELETE'])
