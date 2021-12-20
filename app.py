@@ -14,7 +14,7 @@ from utils.tools import *
 app = Flask(__name__)
 init_db(app)
 app.app_context().push()
-db.create_all()
+
 
 
 app.config['SWAGGER'] = {
@@ -27,6 +27,8 @@ app.config['JWT_SECRET_KEY'] = SECRET_KEY
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = ACCESS_EXPIRES
 app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXPIRES
 jwt = JWTManager(app)
+
+
 
 
 @app.route("/api/v1/auth/login/", methods=["POST"])

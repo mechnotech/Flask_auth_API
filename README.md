@@ -10,6 +10,9 @@ pip install -r requirements.txt
 #### Запустить контейнеры с Redis и Postgres
 `docker-compose -f dev-compose.yaml up -d`
 
+#### Применить миграции alembic
+`alembic upgrade head`
+
 #### При первом запуске (создать первичного пользователя (admin, password) и назначить ему админскую роль)
 `python create_admin.py`
 

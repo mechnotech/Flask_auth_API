@@ -8,7 +8,7 @@ class AuthSettings(BaseSettings):
     db_name: str = os.getenv('DB_NAME', 'auth')
     pg_user: str = os.getenv('POSTGRES_USER', 'auth')
     pg_pass: str = os.getenv('POSTGRES_PASSWORD', 'auth')
-    db_host: str = os.getenv('DB_HOST', '127.0.0.1')
+    db_host: str = os.getenv('POSTGRES_HOST', '127.0.0.1')
     db_port: int = int(os.getenv('DB_PORT', 5433))
     redis_host: str = os.getenv('REDIS_HOST', '127.0.0.1')
     redis_port: int = int(os.getenv('REDIS_PORT', 6363))
@@ -16,6 +16,7 @@ class AuthSettings(BaseSettings):
 
 
 config = AuthSettings()
+DATABASE_URI = f'postgresql://{config.pg_user}:{config.pg_pass}@{config.db_host}:{config.db_port}/{config.db_name}'
 ACCESS_EXPIRES = timedelta(hours=int(os.getenv('ACCESS_EXPIRES_HOURS', 1)))
 REFRESH_EXPIRES = timedelta(days=int(os.getenv('REFRESH_EXPIRES_DAYS', 1)))
 ADMIN_ROLES = ['admin', 'moderator']
