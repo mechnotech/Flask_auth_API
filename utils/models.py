@@ -27,7 +27,7 @@ class UserSet(LoginSet):
 class ProfileSet(AdvancedJsonModel):
     first_name: Optional[str]
     last_name: Optional[str]
-    role: Optional[list]
+    # role: Optional[list]
     bio: Optional[str]
 
 

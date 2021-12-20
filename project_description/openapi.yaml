@@ -273,7 +273,7 @@ paths:
                 role:
                   type: string
       responses:
-        200:
+        201:
           description: Роль успешно создана
           content:
             application/json:
@@ -443,9 +443,6 @@ components:
       title: Пользователь
       type: object
       description: Детальная информация о пользователе
-      required:
-          - username
-          - email
       properties:
         first_name:
           type: string
@@ -453,21 +450,10 @@ components:
         last_name:
           type: string
           title: Фамилия
-        username:
-          type: string
-          title: Username
         bio:
           type: string
           title: О себе
-        email:
-          type: string
-          title: Адрес электронной почты
-        role:
-          type: string
-          description: Администратор или пользователь. По умолчанию `user`.
-          enum:
-            - user
-            - admin
+
 
     Logins:
       title: Список логинов

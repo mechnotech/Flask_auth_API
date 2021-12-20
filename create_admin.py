@@ -10,7 +10,7 @@ app.app_context().push()
 db.create_all()
 
 # Создать админа
-admin = UserSet(login='admin', password=sign('password'), email='mc@ya.ru')
+admin = UserSet(login='admin', password='password', email='mc@ya.ru')
 access_token, refresh_token = get_user_tokens(admin)
 register_user_data(refresh_token, admin)
 

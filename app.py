@@ -29,7 +29,7 @@ app.config['JWT_REFRESH_TOKEN_EXPIRES'] = REFRESH_EXPIRES
 jwt = JWTManager(app)
 
 
-@app.route("/api/v1/login/", methods=["POST"])
+@app.route("/api/v1/auth/login/", methods=["POST"])
 def login():
     user = post_load(obj=LoginSet, request=request)
     db_user = is_user_exists(user.login)
@@ -42,7 +42,7 @@ def login():
     return jsonify(access_token=access_token, refresh_token=refresh_token)
 
 
-@app.route("/api/v1/registration/", methods=["POST"])
+@app.route("/api/v1/auth/registration/", methods=["POST"])
 def registration():
     candidate = post_load(obj=UserSet, request=request)
     user = is_user_exists(candidate, check_email=True)
@@ -53,7 +53,7 @@ def registration():
     return {'msg': f'Пользователь {candidate.login} создан'}, HTTPStatus.CREATED
 
 
-@app.route("/api/v1/refresh/", methods=["POST"])
+@app.route("/api/v1/auth/refresh/", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
     user, jwt_id = user_sets()
@@ -63,7 +63,7 @@ def refresh():
     return jsonify(access_token=access_token, refresh_token=refresh_token)
 
 
-@app.route("/api/v1/logout/", methods=["GET"])
+@app.route("/api/v1/auth/logout/", methods=["GET"])
 @jwt_required()
 def logout():
     user, jwt_id = user_sets()
@@ -102,7 +102,7 @@ class CabinetAPI(MethodView):
         return {'msg': profile}
 
     @jwt_required()
-    def post(self):
+    def patch(self):
         user, _ = user_sets()
         profile = post_load(obj=ProfileSet, request=request)
         update_profile(profile, user)
@@ -139,7 +139,7 @@ class RoleChangeAPI(MethodView):
 app.add_url_rule(
     '/api/v1/users/me/',
     view_func=CabinetAPI.as_view(name='Profile'),
-    methods=['GET', 'POST']
+    methods=['GET', 'PATCH']
 )
 app.add_url_rule(
     '/api/v1/role/<string:role>/',
