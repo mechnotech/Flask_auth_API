@@ -16,9 +16,9 @@ from orjson import orjson
 from pydantic import ValidationError
 from werkzeug.exceptions import abort
 
-from db_models.models import User, SALT, Profile, JwtRefresh, Login, Role
+from db_models.models import User, Profile, JwtRefresh, Login, Role
 from dbs.db import db, cache
-from settings import ACCESS_EXPIRES, REFRESH_EXPIRES, ADMIN_ROLES
+from settings import ACCESS_EXPIRES, REFRESH_EXPIRES, ADMIN_ROLES, SALT
 from utils.models import UserSet, ProfileSet, LogSet, RoleSet
 
 

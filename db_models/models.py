@@ -1,11 +1,9 @@
 import datetime
-import os
 import uuid
-from sqlalchemy.dialects.postgresql import UUID
-from dbs.db import db
-from settings import SALT
 
-SALT = os.getenv('SALT', '8784dg4rgw44fe73sdf7r72s7')
+from sqlalchemy.dialects.postgresql import UUID
+
+from dbs.db import db
 
 roles_related = db.Table(
     'roles_related',
@@ -33,7 +31,6 @@ class Role(db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     role = db.Column(db.String(100), default='user', unique=True, nullable=False)
 
-    
     def __repr__(self):
         return f'{self.role}'
 

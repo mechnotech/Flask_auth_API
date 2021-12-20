@@ -22,4 +22,3 @@ ADMIN_ROLES = ['admin', 'moderator']
 PRIVILEGED_USERS_ROLES = ['subscriber', 'bonus', 'trial']
 SECRET_KEY = os.getenv('SECRET_KEY', 'Eww3ssefw2931dfsd')
 SALT = os.getenv('SALT', '8784dg4rgw44fe73sdf7r72s7')
-
