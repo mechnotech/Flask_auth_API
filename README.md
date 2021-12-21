@@ -3,6 +3,8 @@
 ### Для запуска в Dev нужно:
 #### Создать окружение
 ```
+git clone git@github.com:mechnotech/Flask_auth_API.git
+cd Flask_auth_API
 python -m venv venv
 source venv/bin/activate
 pip install -r src/requirements.txt
@@ -28,9 +30,15 @@ pip install -r src/requirements.txt
 ####
 
 ## Для запуска в Product
-`docker-compose -up -d`
-
+```
+git clone git@github.com:mechnotech/Flask_auth_API.git
+cd Flask_auth_API
+cp .env.example .env
+docker-compose -up -d
+```
 Приложение будет доступно по адресу http://localhost:8500
+
+Документированное API http://localhost:5000/swagger/
 
 
 ### Схема тестирования:
