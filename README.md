@@ -5,7 +5,7 @@
 ```
 python -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 ```
 #### Запустить контейнеры с Redis и Postgres
 `docker-compose -f dev-compose.yaml up -d`
@@ -14,10 +14,10 @@ pip install -r requirements.txt
 `alembic upgrade head`
 
 #### При первом запуске (создать первичного пользователя (admin, password) и назначить ему админскую роль)
-`python create_admin.py`
+`python src/create_admin.py`
 
 #### Запуск приложения:
-`python pywsgi.py`
+`python src/pywsgi.py`
 
 Описание работы этого API доступно после запуска будет доступно по адресу http://localhost:5000/swagger/
 
