@@ -52,7 +52,7 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/site.conf:/etc/nginx/conf.d/site.conf:ro
     ports:
-      - "85:85"
+      - "8500:8500"
     depends_on:
       - auth_api
     networks:
