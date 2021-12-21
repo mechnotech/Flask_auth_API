@@ -15,7 +15,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"login\": \"mech\",\n    \"password\": \"test\",\n    \"email\": \"mc@ya.ru\",\n    \"some\" : \"foo\"\n}",
+					"raw": "{\n    \"login\": \"jc\",\n    \"password\": \"test\",\n    \"email\": \"mech@ya.ru\",\n    \"some\" : \"foo\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -23,12 +23,15 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:5000/registration",
+					"raw": "localhost:5000/api/v1/auth/registration",
 					"host": [
 						"localhost"
 					],
 					"port": "5000",
 					"path": [
+						"api",
+						"v1",
+						"auth",
 						"registration"
 					]
 				}
@@ -63,7 +66,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"login\": \"mech\",\n    \"password\": \"test\"\n}",
+					"raw": "{\n    \"login\": \"admin\",\n    \"password\": \"password\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -71,14 +74,18 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:5000/api/v1/login",
+					"raw": "127.0.0.1:8500/api/v1/auth/login",
 					"host": [
-						"localhost"
+						"127",
+						"0",
+						"0",
+						"1"
 					],
-					"port": "5000",
+					"port": "8500",
 					"path": [
 						"api",
 						"v1",
+						"auth",
 						"login"
 					]
 				}
@@ -93,7 +100,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY0MTM3NywianRpIjoiOTkyYzI0YWEtNjY0NC00MmY5LWFmYzQtYmEzYTJlMWE3NzBkIiwidHlwZSI6InJlZnJlc2giLCJzdWIiOiJtZWNoIiwibmJmIjoxNjM5NjQxMzc3LCJleHAiOjE2Mzk3Mjc3NzcsInJvbGUiOiJ1c2VyIn0.-rcfqpGMht1MP3iXvFleiu6khuelhMmHMB6liZ0TJs0",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTgwNTgxMywianRpIjoiMDMwNWMxZTYtOWNmNi00MDBjLTk2ZWQtYzU2OGViOGY0ZWQ3IiwidHlwZSI6InJlZnJlc2giLCJzdWIiOiJtZWNoIiwibmJmIjoxNjM5ODA1ODEzLCJleHAiOjE2Mzk4OTIyMTN9.8Sffr0repOmisf7ALyOAdYP8roX_Ncw7AQwJaUm6uiQ",
 							"type": "string"
 						}
 					]
@@ -101,7 +108,7 @@
 				"method": "POST",
 				"header": [],
 				"url": {
-					"raw": "localhost:5000/api/v1/refresh",
+					"raw": "localhost:5000/api/v1/auth/refresh",
 					"host": [
 						"localhost"
 					],
@@ -109,6 +116,7 @@
 					"path": [
 						"api",
 						"v1",
+						"auth",
 						"refresh"
 					]
 				}
@@ -123,7 +131,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY0MDA4OTg5OSwianRpIjoiMTk4ZGNlYzItZTg2Yi00NmE2LTg5N2YtYTM5NTMxMDkwNzZmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluIiwibmJmIjoxNjQwMDg5ODk5LCJleHAiOjE2NDAwOTM0OTl9.AENg0kQCWlwYqAvB1-bzV_viv3EgUqPbvRWtCVNAvOQ",
 							"type": "string"
 						}
 					]
@@ -131,11 +139,11 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:5000/api/v1/users/me",
+					"raw": "localhost:8500/api/v1/users/me",
 					"host": [
 						"localhost"
 					],
-					"port": "5000",
+					"port": "8500",
 					"path": [
 						"api",
 						"v1",
@@ -154,13 +162,22 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTYzOTY2NTA5OSwianRpIjoiOWU0MTQ3MTYtNzUyNS00ZWQ1LTk3NjgtNDk1ZWY2MmE4OWU5IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2giLCJuYmYiOjE2Mzk2NjUwOTksImV4cCI6MTYzOTY2ODY5OSwicm9sZSI6InVzZXIifQ.Bcq84-eOMj5nfcxB5SEFn5LK3NL_BO0o7xmhW7c3E8c",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY0MDAwMDk2NiwianRpIjoiZWE1OTU4ZTUtNmVkZi00YzFmLWFjYWItMDEzYWFjNzI4ODNlIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluIiwibmJmIjoxNjQwMDAwOTY2LCJleHAiOjE2NDAwMDQ1NjZ9.kD9rIfm-rGWFkBbiTPlzPpOxSrWrZ7AiHbImiD7LbVc",
 							"type": "string"
 						}
 					]
 				},
-				"method": "GET",
+				"method": "PATCH",
 				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"first_name\": \"John\",\n    \"last_name\": \"Connor\",\n    \"bio\": \"Biiiiio\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
 				"url": {
 					"raw": "localhost:5000/api/v1/users/me",
 					"host": [

@@ -17,6 +17,7 @@ pip install -r src/requirements.txt
 
 #### При первом запуске (создать первичного пользователя (admin, password) и назначить ему админскую роль)
 `python src/create_admin.py`
+Выдаст jwt токены
 
 #### Запуск приложения:
 `python src/pywsgi.py`
@@ -36,6 +37,9 @@ cd Flask_auth_API
 cp .env.example .env
 docker-compose -up -d
 ```
+
+`docker logs auth_api` - для просмотра выданных JWT токенов в консоли
+
 Приложение будет доступно по адресу http://localhost:8500
 
 Документированное API http://localhost:5000/swagger/
