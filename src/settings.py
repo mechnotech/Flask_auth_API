@@ -31,3 +31,4 @@ SWAGGER = {
     "specs_route": "/swagger/"
 }
 DEFAULT_ADMIN_PASS = os.getenv('DEFAULT_ADMIN_PASS', 'password')
+AUTH_NAME=os.getenv('AUTH_NAME', 'auth_api')

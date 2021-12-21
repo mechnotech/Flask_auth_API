@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from flask.views import MethodView
 from flask_jwt_extended import jwt_required
 

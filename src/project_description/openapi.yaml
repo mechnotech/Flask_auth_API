@@ -155,9 +155,7 @@ paths:
         401:
           description: Необходим JWT токен
       security:
-      - jwt_auth:
-        - read:admin,user
-        - write:admin,user
+        - bearerAuth: [ ]
 
   /users/me/:
     get:
@@ -244,13 +242,7 @@ paths:
           Права доступа: **Администратор**
       responses:
         200:
-          description: Список ролей
-          content:
-            application/json:
-              schema:
-                properties:
-                  roles:
-                    type: array
+            description: Список ролей
         401:
           description: Необходим JWT токен
         403:

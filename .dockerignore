@@ -5,6 +5,11 @@ __pycache__/
 *$py.class
 .idea
 
+.env
+.gitignore
+.dockerignore
+dev-compose.yaml
+
 # C extensions
 *.so
 

@@ -1,6 +1,6 @@
 from http import HTTPStatus
 
-from flask import Blueprint, request
+from flask import Blueprint
 from flask.views import MethodView
 
 from utils.models import RoleUser, RoleSet

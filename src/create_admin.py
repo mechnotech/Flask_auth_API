@@ -8,13 +8,13 @@ from utils.models import UserSet, RoleUser
 from utils.tools import set_role, get_user_tokens, register_user_data, admit_role, is_user_exists
 
 
-def check_admin_exists():
+def is_admin_exists():
     # Проверить, не создан ли уже админ?
     admin = is_user_exists('admin')
     if not admin:
-        return
-    print('Пользователь admin уже существует (пароль в env, дефолтный: password)')
-    exit()
+        return False
+
+    return True
 
 
 def create():
@@ -42,5 +42,7 @@ def create():
 if __name__ == '__main__':
     init_db(app)
     app.app_context().push()
-    check_admin_exists()
-    create()
+    if not is_user_exists('admin'):
+        create()
+    else:
+        print('Пользователь admin уже существует (пароль в env, дефолтный: password)')
