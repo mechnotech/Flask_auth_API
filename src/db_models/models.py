@@ -3,10 +3,11 @@ import uuid
 
 from sqlalchemy.dialects.postgresql import UUID
 
-from dbs.db import db
+from dbs.db import db, metadata
 
 roles_related = db.Table(
     'roles_related',
+    metadata,
     db.Column('profile_id', UUID(as_uuid=True), db.ForeignKey('profiles.id'), primary_key=True),
     db.Column('role_id', UUID(as_uuid=True), db.ForeignKey('roles.id'), primary_key=True)
 )
@@ -14,7 +15,6 @@ roles_related = db.Table(
 
 class User(db.Model):
     __tablename__ = 'users'
-
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     login = db.Column(db.String(40), unique=True, nullable=False)
     password = db.Column(db.String(128), nullable=False)

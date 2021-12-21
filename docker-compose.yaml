@@ -1,0 +1,68 @@
+version: "3.6"
+
+volumes:
+  redis_data_auth:
+    name: redis_data_auth
+  postgres_data_auth:
+    name: postgres_data_auth
+  auth_static_volume:
+    name: auth_static_volume
+
+services:
+  postgres_auth:
+    image: postgres:13.0
+    container_name: postgres_auth
+    restart: always
+    volumes:
+      - postgres_data_auth:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    networks:
+      - auth
+
+  redis_auth:
+    image: redis:6.2.6-bullseye
+    container_name: redis_auth
+    restart: always
+    volumes:
+     - redis_data_auth:/data
+    depends_on:
+      - postgres_auth
+    networks:
+     - auth
+
+  auth_api:
+    build: .
+    container_name: auth_api
+    volumes:
+      - auth_static_volume:/code/src/static
+    depends_on:
+      - postgres_auth
+    networks:
+      - auth
+    env_file:
+      - .env
+
+  auth_nginx:
+    image: nginx:1.19.2
+    container_name: auth_nginx
+    restart: always
+    volumes:
+      - auth_static_volume:/code/src/static
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/site.conf:/etc/nginx/conf.d/site.conf:ro
+    ports:
+      - "8500:8500"
+    depends_on:
+      - auth_api
+    networks:
+      - auth
+
+
+networks:
+  auth:
+    driver: bridge
+
+
+
+
