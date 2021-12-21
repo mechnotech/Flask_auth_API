@@ -3,7 +3,7 @@ from flask.views import MethodView
 from flask_jwt_extended import jwt_required
 
 from utils.models import ProfileSet
-from utils.tools import user_sets, get_logins, get_profile, post_load, update_profile
+from utils.tools import user_sets, get_logins, get_profile, post_load, update_profile, cache_it
 
 users = Blueprint('users', __name__)
 
@@ -17,7 +17,7 @@ def history():
 
 
 class CabinetAPI(MethodView):
-    @jwt_required()
+    @cache_it()
     def get(self):
         user, _ = user_sets()
         profile = get_profile(user)
@@ -26,7 +26,7 @@ class CabinetAPI(MethodView):
     @jwt_required()
     def patch(self):
         user, _ = user_sets()
-        profile = post_load(obj=ProfileSet, request=request)
+        profile = post_load(obj=ProfileSet)
         update_profile(profile, user)
         return jsonify({'msg': 'Профиль обновлен'})
 

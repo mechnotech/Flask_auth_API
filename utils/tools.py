@@ -1,9 +1,10 @@
 import hmac
+import json
 from http import HTTPStatus
 from functools import wraps
 from typing import Tuple, Union, Optional, Any
 
-from flask import make_response, jsonify
+from flask import make_response, jsonify, request
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
@@ -23,7 +24,7 @@ from utils.models import UserSet, ProfileSet, LogSet, RoleSet
 
 
 def show_error(text: Optional[Any], http_code: int):
-    return abort(make_response(jsonify({"msg": text}), http_code))
+    return abort(make_response(jsonify({'msg': text}), http_code))
 
 
 def sign(password: str) -> str:
@@ -54,6 +55,10 @@ def is_password_correct(hashed_password: str, password_to_check: str):
 
 def is_token_revoked(jwt_id: str):
     return cache.get(jwt_id)
+
+
+def get_key_to_cache(login: str, url: str) -> str:
+    return f'{login}-{url}'
 
 
 def to_cache_expired(jwt_id: str, token_type='refresh'):
@@ -114,6 +119,9 @@ def update_profile(profile: ProfileSet, user: User):
     db_profile.bio = profile.bio
     db.session.add(db_profile)
     db.session.commit()
+    url = request.base_url
+    key = get_key_to_cache(user.login, url)
+    cache.delete(key)
 
 
 def register_user_data(refresh_token, user: UserSet):
@@ -227,9 +235,9 @@ def user_sets():
     return user, jwt_id
 
 
-def post_load(obj, request):
+def post_load(obj):
     if not request.json:
-        return abort(make_response(jsonify({"msg": 'Пустой запрос'}), HTTPStatus.BAD_REQUEST))
+        return abort(make_response(jsonify({'msg': 'Пустой запрос'}), HTTPStatus.BAD_REQUEST))
     try:
         entity = obj(**request.json)
     except ValidationError as e:
@@ -245,7 +253,27 @@ def admin_required():
             user, jwt_id = user_sets()
             profile = get_profile(user)
             if not set(profile['role']) & set(ADMIN_ROLES):
-                return jsonify({"msg": 'Требуются административные права'}), HTTPStatus.FORBIDDEN
+                return jsonify({'msg': 'Требуются административные права'}), HTTPStatus.FORBIDDEN
             return f(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def cache_it(ttl=JWT_ACCESS_TOKEN_EXPIRES):
+    def decorator(f):
+        @wraps(f)
+        @jwt_required()
+        def wrapper(*args, **kwargs):
+            user, jwt_id = user_sets()
+            url = request.base_url
+            key = get_key_to_cache(user.login, url)
+            value = cache.get(key)
+            if not value:
+                value = f(*args, **kwargs)
+            else:
+                cache.setex(key, ttl, value)
+                return json.loads(value)
+            cache.setex(key, ttl, json.dumps(value))
+            return value
         return wrapper
     return decorator
