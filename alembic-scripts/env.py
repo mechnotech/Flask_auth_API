@@ -21,16 +21,16 @@ fileConfig(config.config_file_name)
 
 target_metadata = models.metadata
 section = config.config_ini_section
-config.set_section_option(section, "DB_NAME", os.getenv("DB_NAME", 'auth'))
-config.set_section_option(section, "POSTGRES_USER", os.getenv("POSTGRES_USER", 'auth'))
-config.set_section_option(section, "POSTGRES_PASSWORD", os.getenv("POSTGRES_PASSWORD", 'auth'))
-config.set_section_option(section, "DB_HOST", os.getenv("POSTGRES_HOST", '127.0.0.1'))
-config.set_section_option(section, "DB_PORT", str(os.getenv("DB_PORT", 5433)))
+config.set_section_option(section, 'DB_NAME', os.getenv('DB_NAME', 'auth'))
+config.set_section_option(section, 'POSTGRES_USER', os.getenv('POSTGRES_USER', 'auth'))
+config.set_section_option(section, 'POSTGRES_PASSWORD', os.getenv('POSTGRES_PASSWORD', 'auth'))
+config.set_section_option(section, 'DB_HOST', os.getenv('POSTGRES_HOST', '127.0.0.1'))
+config.set_section_option(section, 'DB_PORT', str(os.getenv('DB_PORT', 5433)))
 
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
+# my_important_option = config.get_main_option('my_important_option')
 # ... etc.
 
 
@@ -46,12 +46,12 @@ def run_migrations_offline():
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = config.get_main_option('sqlalchemy.url')
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        dialect_opts={'paramstyle': 'named'},
     )
 
     with context.begin_transaction():
@@ -67,7 +67,7 @@ def run_migrations_online():
     """
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
+        prefix='sqlalchemy.',
         poolclass=pool.NullPool,
     )
 

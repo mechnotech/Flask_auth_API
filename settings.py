@@ -16,6 +16,7 @@ class AuthSettings(BaseSettings):
 
 
 config = AuthSettings()
+SQLALCHEMY_TRACK_MODIFICATIONS = False
 SQLALCHEMY_DATABASE_URI = f'postgresql://{config.pg_user}:' \
                           f'{config.pg_pass}@{config.db_host}:{config.db_port}/{config.db_name}'
 JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=int(os.getenv('ACCESS_EXPIRES_HOURS', 1)))
@@ -29,3 +30,4 @@ SWAGGER = {
     'openapi': '3.0.2',
     "specs_route": "/swagger/"
 }
+DEFAULT_ADMIN_PASS = os.getenv('DEFAULT_ADMIN_PASS', 'password')

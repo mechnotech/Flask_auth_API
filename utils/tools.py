@@ -161,7 +161,7 @@ def _get_role(role_name: str, check_exist=False, check_missing=False):
     if check_missing and not role:
         show_error(f'Такой роли: {role_name} нет', HTTPStatus.NOT_FOUND)
     if check_exist and role:
-        show_error(f'Роль с таким названием уже существует!', HTTPStatus.BAD_REQUEST)
+        show_error('Роль с таким названием уже существует!', HTTPStatus.BAD_REQUEST)
     return role
 
 

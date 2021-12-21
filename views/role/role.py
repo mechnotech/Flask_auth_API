@@ -19,10 +19,10 @@ from utils.tools import (
 role = Blueprint('role', __name__)
 
 
-@role.route("admit/", methods=["POST"])
+@role.route('admit/', methods=['POST'])
 @admin_required()
 def role_admit():
-    role_for_user = post_load(obj=RoleUser, request=request)
+    role_for_user = post_load(obj=RoleUser)
     admit_role(role_for_user)
     return {'msg': f'Роль {role_for_user.role} назначена пользователю {role_for_user.user}'}, HTTPStatus.CREATED
 
@@ -43,7 +43,7 @@ class RoleAPI(MethodView):
     @admin_required()
     def post(self):
         user, _ = user_sets()
-        role_obj = post_load(obj=RoleSet, request=request)
+        role_obj = post_load(obj=RoleSet)
         set_role(role_obj.role)
         return {'created_role': role_obj.role}
 
@@ -51,7 +51,7 @@ class RoleAPI(MethodView):
 class RoleChangeAPI(MethodView):
     @admin_required()
     def patch(self, role_name):
-        role_new = post_load(obj=RoleSet, request=request)
+        role_new = post_load(obj=RoleSet)
         update_role(role_name, role_new)
         return {'msg': 'Роль обновлена'}
 
