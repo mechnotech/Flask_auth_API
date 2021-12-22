@@ -97,8 +97,13 @@ C gevent такого не происходит.
 200-300 мс под таким ddos`ом.
 Срабатывают ограничения Nginx на число коннектов к эндпоинту.
 
+После некоторых оптимизаций удалось добиться 850 запросов в сек к бэкенду, и похоже, что это потолок.
+
+Применив кеширование в самом **Nginx** результат выше на порядки - 35К в секунду.
+
+
 ```
-ab -k -c 50 -n 20000 -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY0MDA4OTg5OSwianRpIjoiMTk4ZGNlYzItZTg2Yi00NmE2LTg5N2YtYTM5NTMxMDkwNzZmIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluIiwibmJmIjoxNjQwMDg5ODk5LCJleHAiOjE2NDAwOTM0OTl9.AENg0kQCWlwYqAvB1-bzV_viv3EgUqPbvRWtCVNAvOQ" localhost:8500/api/v1/users/me/
+ab -k -c 50 -n 20000 -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY0MDE3NjczNiwianRpIjoiOWM1OWU1MGEtM2RhZS00Y2IwLWI2NDctZmNiYjEyOThjOWM2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluIiwibmJmIjoxNjQwMTc2NzM2LCJleHAiOjE2NDAxODAzMzZ9.pHjt1Lm5yioGcuGuj0-xb2QFMZa7zuo0K_VB1ADmgfg" localhost:8500/api/v1/users/me/
 This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/
@@ -119,43 +124,40 @@ Finished 20000 requests
 
 Server Software:        nginx
 Server Hostname:        localhost
-Server Port:            85
+Server Port:            8500
 
 Document Path:          /api/v1/users/me/
-Document Length:        87 bytes
+Document Length:        80 bytes
 
 Concurrency Level:      50
-Time taken for tests:   56.268 seconds
+Time taken for tests:   0.572 seconds
 Complete requests:      20000
-Failed requests:        9306
-   (Connect: 0, Receive: 0, Length: 9306, Exceptions: 0)
-Non-2xx responses:      9306
-Keep-Alive requests:    19823
-Total transferred:      5237475 bytes
-HTML transferred:       2289054 bytes
-Requests per second:    355.44 [#/sec] (mean)
-Time per request:       140.669 [ms] (mean)
-Time per request:       2.813 [ms] (mean, across all concurrent requests)
-Transfer rate:          90.90 [Kbytes/sec] received
+Failed requests:        0
+Keep-Alive requests:    19829
+Total transferred:      4939149 bytes
+HTML transferred:       1600000 bytes
+Requests per second:    34942.07 [#/sec] (mean)
+Time per request:       1.431 [ms] (mean)
+Time per request:       0.029 [ms] (mean, across all concurrent requests)
+Transfer rate:          8426.96 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0    0   0.1      0       4
-Processing:     0  140 177.9    120    1592
-Waiting:        0  140 177.9    120    1592
-Total:          0  140 177.9    120    1592
+Connect:        0    0   0.1      0       3
+Processing:     0    1   3.5      1      93
+Waiting:        0    1   3.5      1      92
+Total:          0    1   3.6      1      93
 
 Percentage of the requests served within a certain time (ms)
-  50%    120
-  66%    161
-  75%    225
-  80%    264
-  90%    372
-  95%    499
-  98%    641
-  99%    747
- 100%   1592 (longest request)
-
+  50%      1
+  66%      1
+  75%      1
+  80%      1
+  90%      1
+  95%      2
+  98%      2
+  99%      2
+ 100%     93 (longest request)
 ```
 
 
