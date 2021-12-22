@@ -7,6 +7,8 @@ volumes:
     name: postgres_data_auth
   auth_static_volume:
     name: auth_static_volume
+  nginx_cache:
+    name: nginx_cache
 
 services:
   postgres_auth:
@@ -49,8 +51,10 @@ services:
     restart: always
     volumes:
       - auth_static_volume:/code/src/static
+      - nginx_cache:/var/lib/nginx/proxy_cache
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/site.conf:/etc/nginx/conf.d/site.conf:ro
+      - ./nginx/cache.conf:/etc/nginx/conf.d/cache.conf:ro
     ports:
       - "8500:8500"
     depends_on:
