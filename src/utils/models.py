@@ -15,6 +15,15 @@ class AdvancedJsonModel(BaseModel):
         json_dumps = orjson_dumps
 
 
+class OAuthProviderSet(AdvancedJsonModel):
+    oauth_provider: str
+    request_code: Optional[str] = None
+    access_token: Optional[str] = None
+    refresh_token: Optional[str] = None
+    client_id: Optional[str] = None
+    client_secret: Optional[str] = None
+
+
 class LoginSet(AdvancedJsonModel):
     login: str
     password: str

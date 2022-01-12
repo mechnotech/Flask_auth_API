@@ -31,4 +31,13 @@ SWAGGER = {
     "specs_route": "/swagger/"
 }
 DEFAULT_ADMIN_PASS = os.getenv('DEFAULT_ADMIN_PASS', 'password')
-AUTH_NAME=os.getenv('AUTH_NAME', 'auth_api')
+AUTH_NAME = os.getenv('AUTH_NAME', 'auth_api')
+
+OAUTH_PROVIDERS = {
+    'yandex': {'client_id': os.getenv('YANDEX_CLIENT_ID', '392d5a358be14596896095f4e7c57e38'),
+               'client_secret': os.getenv('YANDEX_CLIENT_SECRET', '8330cb24871c4700978f1c6a8a71fe84'),
+               'request_code_url': 'https://oauth.yandex.ru/authorize?response_type=code&client_id=',
+               'get_access_token_url': 'https://oauth.yandex.ru/token',
+               'get_user_info_url': 'https://login.yandex.ru/info?format=json'
+               }
+}
