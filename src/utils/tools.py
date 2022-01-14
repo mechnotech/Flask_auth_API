@@ -17,7 +17,7 @@ from orjson import orjson
 from pydantic import ValidationError
 from werkzeug.exceptions import abort
 
-from db_models.models import User, Profile, JwtRefresh, Login, Role
+from db_models.models import User, Profile, JwtRefresh, Login, Role, SocialAccount
 from dbs.db import db, cache
 from settings import JWT_ACCESS_TOKEN_EXPIRES, JWT_REFRESH_TOKEN_EXPIRES, ADMIN_ROLES, SALT
 from utils.models import UserSet, ProfileSet, LogSet, RoleSet
@@ -36,6 +36,10 @@ def get_user_tokens(user) -> Tuple[str, str]:
     access_token = create_access_token(identity=user.login)
     refresh_token = create_refresh_token(identity=user.login)
     return access_token, refresh_token
+
+
+def get_user_by_id(user_id):
+    return User.query.filter_by(id=user_id).first()
 
 
 def is_user_exists(user: Union[UserSet, str], check_email=None) -> Optional[User]:
@@ -122,6 +126,22 @@ def update_profile(profile: ProfileSet, user: User):
     url = request.base_url
     key = get_key_to_cache(user.login, url)
     cache.delete(key)
+
+
+def is_social_exist(social_id, social_name):
+    return SocialAccount.query.filter_by(
+        social_id=str(social_id), social_name=social_name
+    ).one_or_none()
+
+
+def create_social(social_id, social_name, user_id):
+    new_account = SocialAccount(
+        social_id=social_id,
+        social_name=social_name,
+        user_id=user_id
+    )
+    db.session.add(new_account)
+    db.session.commit()
 
 
 def register_user_data(refresh_token, user: UserSet):
@@ -255,7 +275,9 @@ def admin_required():
             if not set(profile['role']) & set(ADMIN_ROLES):
                 return jsonify({'msg': 'Требуются административные права'}), HTTPStatus.FORBIDDEN
             return f(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -275,5 +297,7 @@ def cache_it(ttl=JWT_ACCESS_TOKEN_EXPIRES):
                 return json.loads(value)
             cache.setex(key, ttl, json.dumps(value))
             return value
+
         return wrapper
+
     return decorator

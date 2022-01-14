@@ -39,5 +39,11 @@ OAUTH_PROVIDERS = {
                'request_code_url': 'https://oauth.yandex.ru/authorize?response_type=code&client_id=',
                'get_access_token_url': 'https://oauth.yandex.ru/token',
                'get_user_info_url': 'https://login.yandex.ru/info?format=json'
-               }
+               },
+    'vk': {'client_id': os.getenv('VK_CLIENT_ID', '8049716'),
+           'client_secret': os.getenv('VK_CLIENT_SECRET', 'ErcbpNBtXw90Q9cHNiMG'),
+           'request_code_url': 'https://oauth.vk.com/authorize?display=page&scope=+4194304&client_id=',
+           'get_access_token_url': 'https://oauth.vk.com/access_token',
+           'get_user_info_url': 'https://api.vk.com/method/account.getProfileInfo?v=5.123'
+           }
 }
