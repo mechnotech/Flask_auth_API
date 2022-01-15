@@ -45,5 +45,5 @@ OAUTH_PROVIDERS = {
            'request_code_url': 'https://oauth.vk.com/authorize?display=page&scope=+4194304&client_id=',
            'get_access_token_url': 'https://oauth.vk.com/access_token',
            'get_user_info_url': 'https://api.vk.com/method/account.getProfileInfo?v=5.123'
-           }
+           },
 }

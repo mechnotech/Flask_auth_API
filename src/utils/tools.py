@@ -144,6 +144,22 @@ def create_social(social_id, social_name, user_id):
     db.session.commit()
 
 
+def remove_user_social(user: User, social: str, complete=False):
+    if complete:
+        records = SocialAccount.query.filter_by(user_id=user.id).all()
+    else:
+        records = SocialAccount.query.filter_by(user_id=user.id, social_name=social).all()
+    if records:
+        for record in records:
+            db.session.delete(record)
+        db.session.commit()
+        return
+
+    return show_error('Пользователь не связан с такой службой OAuth', HTTPStatus.NOT_FOUND)
+
+
+
+
 def register_user_data(refresh_token, user: UserSet):
     new_user = User(
         login=user.login,
@@ -174,7 +190,7 @@ def _get_role(role_name: str, check_exist=False, check_missing=False):
     :param role_name: Название роли, например user
     :param check_exist: Проверить и поднять ошибку если роль уже существует
     :param check_missing: Проверить и поднять ошибку если роль не существует
-    :return:
+    :return: Роль
     """
     Role.query.all()
     role = Role.query.filter_by(role=role_name).one_or_none()

@@ -36,6 +36,8 @@ servers:
   - url: /api/v1/
 
 tags:
+  - name: OAUTH
+    description: Aутентификация через OAuth провайдера
   - name: AUTH
     description: Аутентификация
   - name: USERS
@@ -44,6 +46,133 @@ tags:
     description: Роли
 
 paths:
+  /oauth/registration/:
+    post:
+      tags:
+        - OAUTH
+      description: Регистрация пользователя c помощью OAuth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - oauth_provider
+              properties:
+                oauth_provider:
+                  type: string
+                  example: yandex
+                request_code:
+                  type: string
+                  example: null
+                  default: null
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg:
+                    type: string
+
+          description: 'Вы зарегистрировались через OAuth (NNNN)! Ваш логин: NNNN, ваш пароль: XXXXX'
+        307:
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg:
+                    type: string
+                    example: 'https://some_oauth.com/?code=code'
+
+          description: 'Перейдите по ссылке для авторизации!'
+        409:
+          content:
+            application/json:
+              schema:
+                properties:
+                  login:
+                    type: string
+                  email:
+                    type: string
+                    format: email
+          description: 'Пользователь с таким login или email уже зарегистрирован!'
+
+  /oauth/login/:
+    post:
+      tags:
+        - OAUTH
+      description: Логин c помощью OAuth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              required:
+                - oauth_provider
+              properties:
+                oauth_provider:
+                  type: string
+                  example: yandex
+                request_code:
+                  type: string
+                  example: null
+                  default: null
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg:
+                    type: string
+
+          description: 'Успешный вход!'
+        307:
+          content:
+            application/json:
+              schema:
+                properties:
+                  msg:
+                    type: string
+                    example: 'https://some_oauth.com/?code=code'
+
+          description: 'Перейдите по ссылке для авторизации!'
+
+
+  /oauth/remove/{service}:
+    parameters:
+      - name: service
+        in: path
+        required: true
+        description: Название сервиса OAuth (например yandex)
+        schema:
+          type: string
+          example: 'yandex'
+
+    delete:
+      tags:
+        - OAUTH
+      description: |
+        Удалить связь OAuth сервиса и аккаунта. 'all' - удалить все OAuth сервисы
+        Права доступа: **Авторизованный пользователь**
+      responses:
+        200:
+          description: ОAuth удален
+          content:
+            application/json:
+              schema:
+                properties:
+                  deleted:
+                    type: string
+        401:
+          description: Необходим JWT токен
+        403:
+          description: Нет прав доступа
+        404:
+          description: Такой сервис OAuth не существует
+      security:
+        - bearerAuth: [ ]
+
+
 
   /auth/registration/:
     post:
