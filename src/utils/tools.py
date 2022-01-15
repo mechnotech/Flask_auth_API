@@ -158,8 +158,6 @@ def remove_user_social(user: User, social: str, complete=False):
     return show_error('Пользователь не связан с такой службой OAuth', HTTPStatus.NOT_FOUND)
 
 
-
-
 def register_user_data(refresh_token, user: UserSet):
     new_user = User(
         login=user.login,

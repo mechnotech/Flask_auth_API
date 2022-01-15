@@ -150,6 +150,3 @@ def remove(social):
         return show_error('Такой провайдер OAuth не поддерживается!', HTTPStatus.UNPROCESSABLE_ENTITY)
     remove_user_social(user=user, social=social)
     return {'msg': f'Логин через {social} удален для пользователя {user.login}'}
-
-
-
