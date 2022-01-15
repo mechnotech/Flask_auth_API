@@ -1,14 +1,17 @@
+from datetime import timedelta
+
 from flask import Blueprint, jsonify
 from flask.views import MethodView
 from flask_jwt_extended import jwt_required
 
 from utils.models import ProfileSet
-from utils.tools import user_sets, get_logins, get_profile, post_load, update_profile
+from utils.tools import user_sets, get_logins, get_profile, post_load, update_profile, cache_it
 
 users = Blueprint('users', __name__)
 
 
 @users.route("history/", methods=["GET"])
+@cache_it(ttl=timedelta(minutes=1))
 @jwt_required()
 def history():
     user, jwt_id = user_sets()
