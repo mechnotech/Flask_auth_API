@@ -1,8 +1,11 @@
 ##  OAuth API
+#### Дополнения текущего спринта:
 
 Добавлены эндпоинты OAuth:
 http://localhost:5000/swagger/
+
 или
+
 http://localhost:8500/swager/ (при запуске docker-compose up --build)
 
 Логика работы:
