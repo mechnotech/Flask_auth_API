@@ -18,3 +18,4 @@ Flask-JWT-Extended~=4.3.1
 psycopg2-binary==2.9.2
 flasgger==0.9.5
 alembic==1.7.5
+requests==2.27.1

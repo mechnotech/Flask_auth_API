@@ -17,7 +17,7 @@ from orjson import orjson
 from pydantic import ValidationError
 from werkzeug.exceptions import abort
 
-from db_models.models import User, Profile, JwtRefresh, Login, Role
+from db_models.models import User, Profile, JwtRefresh, Login, Role, SocialAccount
 from dbs.db import db, cache
 from settings import JWT_ACCESS_TOKEN_EXPIRES, JWT_REFRESH_TOKEN_EXPIRES, ADMIN_ROLES, SALT
 from utils.models import UserSet, ProfileSet, LogSet, RoleSet
@@ -36,6 +36,10 @@ def get_user_tokens(user) -> Tuple[str, str]:
     access_token = create_access_token(identity=user.login)
     refresh_token = create_refresh_token(identity=user.login)
     return access_token, refresh_token
+
+
+def get_user_by_id(user_id):
+    return User.query.filter_by(id=user_id).first()
 
 
 def is_user_exists(user: Union[UserSet, str], check_email=None) -> Optional[User]:
@@ -124,6 +128,38 @@ def update_profile(profile: ProfileSet, user: User):
     cache.delete(key)
 
 
+def is_social_exist(social_id, social_name):
+    return SocialAccount.query.filter_by(
+        social_id=str(social_id), social_name=social_name
+    ).one_or_none()
+
+
+def create_social(social_id, social_name, user_id):
+    new_account = SocialAccount(
+        social_id=social_id,
+        social_name=social_name,
+        user_id=user_id
+    )
+    db.session.add(new_account)
+    db.session.commit()
+
+
+def remove_user_social(user: User, social: str, complete=False):
+    if complete:
+        records = SocialAccount.query.filter_by(user_id=user.id).all()
+    else:
+        records = SocialAccount.query.filter_by(user_id=user.id, social_name=social).all()
+    if records:
+        for record in records:
+            db.session.delete(record)
+        db.session.commit()
+        return
+
+    return show_error('Пользователь не связан с такой службой OAuth', HTTPStatus.NOT_FOUND)
+
+
+
+
 def register_user_data(refresh_token, user: UserSet):
     new_user = User(
         login=user.login,
@@ -154,7 +190,7 @@ def _get_role(role_name: str, check_exist=False, check_missing=False):
     :param role_name: Название роли, например user
     :param check_exist: Проверить и поднять ошибку если роль уже существует
     :param check_missing: Проверить и поднять ошибку если роль не существует
-    :return:
+    :return: Роль
     """
     Role.query.all()
     role = Role.query.filter_by(role=role_name).one_or_none()
@@ -255,7 +291,9 @@ def admin_required():
             if not set(profile['role']) & set(ADMIN_ROLES):
                 return jsonify({'msg': 'Требуются административные права'}), HTTPStatus.FORBIDDEN
             return f(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
@@ -275,5 +313,7 @@ def cache_it(ttl=JWT_ACCESS_TOKEN_EXPIRES):
                 return json.loads(value)
             cache.setex(key, ttl, json.dumps(value))
             return value
+
         return wrapper
+
     return decorator

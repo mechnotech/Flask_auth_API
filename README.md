@@ -1,3 +1,25 @@
+##  OAuth API
+#### Дополнения текущего спринта:
+
+Добавлены эндпоинты OAuth:
+http://localhost:5000/swagger/
+
+или
+
+http://localhost:8500/swager/ (при запуске docker-compose up --build)
+
+Логика работы:
+
+1) Пользователь создает аккаунт с помощью OAuth провайдеров (на данный момент поддерживаются yandex и vk), если пользователя не существует полученными от провайдера OAuth логином или email
+создает логин и пароль, который показывает один раз после регистрации. Т.о. можно зайти как через обычный Auth так и OAuth login
+2) Пользователь осуществляет логин с помощью OAuth, если был зарегистрирован через OAuth.
+3) Пользователь может удалить связь аккаунта и OAuth
+
+Добавлено кэширование кеширование в самом **Nginx** к эндпоинту /users/me/
+результат - ~30К запросов в секунду.
+
+Остальные эндпоинты закрыты ограничением **Nginx** на 100 запросов в секунду с IP
+
 ##  Auth API
 
 ### Для запуска в Dev нужно:
@@ -82,6 +104,13 @@ Fast API - выступает MitM агентом пробрасывая заг�
  alembic его не увидит. Попытка же решить проблему через манипуляции с PATH решит проблему миграций, но
 приведет к слому настроек Pycharm, восстановить которые я смог только сбросом в "заводские" настройки :(
 
+Примеры команд:
+
+`alembic revision --autogenerate -m "Added Some table"` - сделать миграцию
+`alembic upgrade head` - применить миграцию
+
+
+
 #### Действительно ли этот flask работает асинхронно с gevent?
 
 создаем пару эндпоинтов с time.sleep(30)
@@ -103,7 +132,7 @@ C gevent такого не происходит.
 
 
 ```
-ab -k -c 50 -n 20000 -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY0MDE3NjczNiwianRpIjoiOWM1OWU1MGEtM2RhZS00Y2IwLWI2NDctZmNiYjEyOThjOWM2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6ImFkbWluIiwibmJmIjoxNjQwMTc2NzM2LCJleHAiOjE2NDAxODAzMzZ9.pHjt1Lm5yioGcuGuj0-xb2QFMZa7zuo0K_VB1ADmgfg" localhost:8500/api/v1/users/me/
+ab -k -c 50 -n 20000 -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTY0MjI0MTc4MywianRpIjoiYmQxYThmMTYtNzRhMS00NDc5LTlkODItZDNiMmZlNGM4ZDkzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6Im1lY2hub3RlY2giLCJuYmYiOjE2NDIyNDE3ODMsImV4cCI6MTY0MjI0NTM4M30.RHX8S7jTf-h0pV6p8cf7Cakr-_A7QaP8E_lh_Ob0OGE" localhost:8500/api/v1/users/me/
 This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
 Licensed to The Apache Software Foundation, http://www.apache.org/
