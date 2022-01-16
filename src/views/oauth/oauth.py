@@ -76,7 +76,7 @@ class GetUserinfoFromOAuth:
         self.provider.access_token = self.tokens.get('access_token')
         self.provider.refresh_token = self.tokens.get('refresh_token')
         self.social_id = None
-        self.choose = {'vk': self.vk, 'yandex': self.yandex}
+        self.select = {'vk': self.vk, 'yandex': self.yandex}
 
     def vk(self):
         email = self.tokens.get('email')
@@ -105,7 +105,7 @@ class GetUserinfoFromOAuth:
 def login():
     provider = post_load(obj=OAuthProviderSet)
     info = GetUserinfoFromOAuth(provider)
-    candidate_raw, profile_raw = info.choose[provider.oauth_provider]()
+    candidate_raw, profile_raw = info.select[provider.oauth_provider]()
     social = is_social_exist(social_id=profile_raw['social_id'], social_name=provider.oauth_provider)
     if not social:
         return jsonify({'msg': 'Пользователь не зарегистрирован!'}), HTTPStatus.NOT_FOUND
@@ -120,7 +120,7 @@ def login():
 def registration():
     provider = post_load(obj=OAuthProviderSet)
     info = GetUserinfoFromOAuth(provider)
-    candidate_raw, profile_raw = info.choose[provider.oauth_provider]()
+    candidate_raw, profile_raw = info.select[provider.oauth_provider]()
     candidate = UserSet(**candidate_raw)
 
     user = is_user_exists(candidate, check_email=True)
