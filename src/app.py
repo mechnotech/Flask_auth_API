@@ -24,6 +24,5 @@ app.register_blueprint(oauth, url_prefix='/api/v1/oauth')
 
 if __name__ == '__main__':
     app.run(
-        host='0.0.0.0',
-        port=config.auth_port,
+        host='0.0.0.0', port=config.auth_port,
     )

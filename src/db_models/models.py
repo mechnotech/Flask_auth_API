@@ -9,7 +9,7 @@ roles_related = db.Table(
     'roles_related',
     metadata,
     db.Column('profile_id', UUID(as_uuid=True), db.ForeignKey('profiles.id'), primary_key=True),
-    db.Column('role_id', UUID(as_uuid=True), db.ForeignKey('roles.id'), primary_key=True)
+    db.Column('role_id', UUID(as_uuid=True), db.ForeignKey('roles.id'), primary_key=True),
 )
 
 
@@ -39,11 +39,10 @@ class Profile(db.Model):
     __tablename__ = 'profiles'
 
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     first_name = db.Column(db.String(128))
     last_name = db.Column(db.String(128))
-    role = db.relationship('Role', secondary=roles_related, lazy='subquery',
-                           backref=db.backref('profiles', lazy=True))
+    role = db.relationship('Role', secondary=roles_related, lazy='subquery', backref=db.backref('profiles', lazy=True))
     bio = db.Column(db.String(10000))
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
@@ -58,7 +57,7 @@ class Profile(db.Model):
 class JwtRefresh(db.Model):
     __tablename__ = 'jwt'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     refresh_token = db.Column(db.String)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
@@ -70,7 +69,7 @@ class JwtRefresh(db.Model):
 class Login(db.Model):
     __tablename__ = 'logins'
     id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id", ondelete='CASCADE'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
     info = db.Column(db.String)
     status = db.Column(db.String, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.datetime.utcnow)
@@ -93,4 +92,3 @@ class SocialAccount(db.Model):
 
     def __repr__(self):
         return f'<SocialAccount {self.social_name}:{self.user_id}>'
-

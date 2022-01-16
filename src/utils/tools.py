@@ -11,7 +11,7 @@ from flask_jwt_extended import (
     get_jti,
     jwt_required,
     get_jwt_identity,
-    get_jwt
+    get_jwt,
 )
 from orjson import orjson
 from pydantic import ValidationError
@@ -46,9 +46,7 @@ def is_user_exists(user: Union[UserSet, str], check_email=None) -> Optional[User
     User.query.all()
     if check_email:
         return (
-                User.query.filter_by(login=user.login).one_or_none()
-                or
-                User.query.filter_by(email=user.email).one_or_none()
+            User.query.filter_by(login=user.login).one_or_none() or User.query.filter_by(email=user.email).one_or_none()
         )
     return User.query.filter_by(login=user).one_or_none()
 
@@ -111,8 +109,9 @@ def get_profile(user):
             first_name=profile.first_name,
             last_name=profile.last_name,
             role=[str(x) for x in profile.role],
-            bio=profile.bio
-        ).json())
+            bio=profile.bio,
+        ).json()
+    )
 
 
 def update_profile(profile: ProfileSet, user: User):
@@ -129,17 +128,11 @@ def update_profile(profile: ProfileSet, user: User):
 
 
 def is_social_exist(social_id, social_name):
-    return SocialAccount.query.filter_by(
-        social_id=str(social_id), social_name=social_name
-    ).one_or_none()
+    return SocialAccount.query.filter_by(social_id=str(social_id), social_name=social_name).one_or_none()
 
 
 def create_social(social_id, social_name, user_id):
-    new_account = SocialAccount(
-        social_id=social_id,
-        social_name=social_name,
-        user_id=user_id
-    )
+    new_account = SocialAccount(social_id=social_id, social_name=social_name, user_id=user_id)
     db.session.add(new_account)
     db.session.commit()
 
@@ -159,11 +152,7 @@ def remove_user_social(user: User, social: str, complete=False):
 
 
 def register_user_data(refresh_token, user: UserSet):
-    new_user = User(
-        login=user.login,
-        password=sign(user.password),
-        email=user.email
-    )
+    new_user = User(login=user.login, password=sign(user.password), email=user.email)
     db.session.add(new_user)
     db.session.commit()
     User.query.all()

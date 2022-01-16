@@ -21,7 +21,7 @@ from utils.tools import (
     is_social_exist,
     get_user_by_id,
     user_sets,
-    remove_user_social
+    remove_user_social,
 )
 
 oauth = Blueprint('OAuth', __name__)
@@ -61,7 +61,7 @@ def provider_get_tokens(provider: OAuthProviderSet):
         'grant_type': 'authorization_code',
         'code': provider.request_code,
         'client_id': provider.client_id,
-        'client_secret': provider.client_secret
+        'client_secret': provider.client_secret,
     }
 
     headers = {'Content-type': 'application/x-www-form-urlencoded'}
@@ -70,7 +70,6 @@ def provider_get_tokens(provider: OAuthProviderSet):
 
 
 class GetUserinfoFromOAuth:
-
     def __init__(self, provider: OAuthProviderSet):
         self.provider = provider
         self.tokens = provider_get_tokens(provider)
@@ -84,11 +83,7 @@ class GetUserinfoFromOAuth:
         social_id = self.tokens.get('user_id')
         candidate_raw = {'login': f'vk_{social_id}', 'email': email}
         candidate_raw['password'] = generate_password(candidate_raw)
-        profile_raw = {
-            'first_name': None,
-            'last_name': None,
-            'social_id': social_id
-        }
+        profile_raw = {'first_name': None, 'last_name': None, 'social_id': social_id}
         return candidate_raw, profile_raw
 
     def yandex(self):
@@ -101,7 +96,7 @@ class GetUserinfoFromOAuth:
         profile_raw = {
             'first_name': content.get('first_name'),
             'last_name': content.get('last_name'),
-            'social_id': content.get('id')
+            'social_id': content.get('id'),
         }
         return candidate_raw, profile_raw
 
@@ -140,14 +135,15 @@ def registration():
 
     profile = ProfileSet(**profile_raw)
     user = is_user_exists(candidate, check_email=True)
-    create_social(
-        social_id=profile_raw['social_id'],
-        social_name=provider.oauth_provider,
-        user_id=user.id
-    )
+    create_social(social_id=profile_raw['social_id'], social_name=provider.oauth_provider, user_id=user.id)
     update_profile(profile, user)
-    return {'msg': f'Вы зарегистрировались через OAuth ({provider.oauth_provider})! Ваш логин:'
-                   f' {candidate.login}, ваш пароль: {candidate.password}'}, HTTPStatus.CREATED
+    return (
+        {
+            'msg': f'Вы зарегистрировались через OAuth ({provider.oauth_provider})! Ваш логин:'
+            f' {candidate.login}, ваш пароль: {candidate.password}'
+        },
+        HTTPStatus.CREATED,
+    )
 
 
 @oauth.route('remove/<string:social>', methods=['DELETE'])

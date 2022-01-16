@@ -62,12 +62,6 @@ class RoleChangeAPI(MethodView):
 
 
 role.add_url_rule(
-    '<string:role_name>/',
-    view_func=RoleChangeAPI.as_view(name='RoleChange'),
-    methods=['PATCH', 'DELETE']
+    '<string:role_name>/', view_func=RoleChangeAPI.as_view(name='RoleChange'), methods=['PATCH', 'DELETE']
 )
-role.add_url_rule(
-    '/',
-    view_func=RoleAPI.as_view(name='Role'),
-    methods=['GET', 'POST']
-)
+role.add_url_rule('/', view_func=RoleAPI.as_view(name='Role'), methods=['GET', 'POST'])

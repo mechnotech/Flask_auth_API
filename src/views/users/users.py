@@ -10,7 +10,7 @@ from utils.tools import user_sets, get_logins, get_profile, post_load, update_pr
 users = Blueprint('users', __name__)
 
 
-@users.route("history/", methods=["GET"])
+@users.route('history/', methods=['GET'])
 @cache_it(ttl=timedelta(minutes=1))
 @jwt_required()
 def history():
@@ -34,8 +34,4 @@ class CabinetAPI(MethodView):
         return jsonify({'msg': 'Профиль обновлен'})
 
 
-users.add_url_rule(
-    'me/',
-    view_func=CabinetAPI.as_view(name='Profile'),
-    methods=['GET', 'PATCH']
-)
+users.add_url_rule('me/', view_func=CabinetAPI.as_view(name='Profile'), methods=['GET', 'PATCH'])
