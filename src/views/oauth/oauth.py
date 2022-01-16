@@ -75,7 +75,6 @@ class GetUserinfoFromOAuth:
         self.tokens = provider_get_tokens(provider)
         self.provider.access_token = self.tokens.get('access_token')
         self.provider.refresh_token = self.tokens.get('refresh_token')
-        self.social_id = None
         self.select = {'vk': self.vk, 'yandex': self.yandex}
 
     def vk(self):
