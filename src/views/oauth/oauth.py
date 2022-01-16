@@ -14,7 +14,14 @@ from utils.tools import (
     get_user_tokens,
     do_checkout,
     register_user_data,
-    show_error, sign, update_profile, create_social, is_social_exist, get_user_by_id, user_sets, remove_user_social
+    show_error,
+    sign,
+    update_profile,
+    create_social,
+    is_social_exist,
+    get_user_by_id,
+    user_sets,
+    remove_user_social
 )
 
 oauth = Blueprint('OAuth', __name__)
@@ -62,37 +69,48 @@ def provider_get_tokens(provider: OAuthProviderSet):
     return check_request(res)
 
 
-def provider_get_userinfo(provider: OAuthProviderSet):
-    tokens = provider_get_tokens(provider)
+class GetUserinfoFromOAuth:
 
-    if provider.oauth_provider == 'vk':
-        provider.access_token = tokens.get('access_token')
-        social_id = tokens.get('user_id')
-        email = tokens.get('email')
+    def __init__(self, provider: OAuthProviderSet):
+        self.provider = provider
+        self.tokens = provider_get_tokens(provider)
+        self.provider.access_token = self.tokens.get('access_token')
+        self.provider.refresh_token = self.tokens.get('refresh_token')
+        self.social_id = None
+        self.choose = {'vk': self.vk, 'yandex': self.yandex}
+
+    def vk(self):
+        email = self.tokens.get('email')
+        social_id = self.tokens.get('user_id')
         candidate_raw = {'login': f'vk_{social_id}', 'email': email}
         candidate_raw['password'] = generate_password(candidate_raw)
-        profile_raw = {'first_name': None, 'last_name': None,
-                       'social_id': social_id}
+        profile_raw = {
+            'first_name': None,
+            'last_name': None,
+            'social_id': social_id
+        }
         return candidate_raw, profile_raw
 
-    provider.access_token = tokens.get('access_token')
-    provider.refresh_token = tokens.get('refresh_token')
-    headers = {'Authorization': f'Bearer {provider.access_token}'}
-    prov_sets = OAUTH_PROVIDERS[provider.oauth_provider]
-    res = rq.get(url=prov_sets['get_user_info_url'], headers=headers)
-    content = check_request(res)
-    candidate_raw = {'login': content.get('login'), 'email': content.get('default_email')}
-    candidate_raw['password'] = generate_password(candidate_raw)
-    profile_raw = {'first_name': content.get('first_name'), 'last_name': content.get('last_name'),
-                   'social_id': content.get('id')}
-
-    return candidate_raw, profile_raw
+    def yandex(self):
+        headers = {'Authorization': f'Bearer {self.provider.access_token}'}
+        prov_sets = OAUTH_PROVIDERS['yandex']
+        res = rq.get(url=prov_sets['get_user_info_url'], headers=headers)
+        content = check_request(res)
+        candidate_raw = {'login': content.get('login'), 'email': content.get('default_email')}
+        candidate_raw['password'] = generate_password(candidate_raw)
+        profile_raw = {
+            'first_name': content.get('first_name'),
+            'last_name': content.get('last_name'),
+            'social_id': content.get('id')
+        }
+        return candidate_raw, profile_raw
 
 
 @oauth.route('login/', methods=['POST'])
 def login():
     provider = post_load(obj=OAuthProviderSet)
-    candidate_raw, profile_raw = provider_get_userinfo(provider)
+    info = GetUserinfoFromOAuth(provider)
+    candidate_raw, profile_raw = info.choose[provider.oauth_provider]()
     social = is_social_exist(social_id=profile_raw['social_id'], social_name=provider.oauth_provider)
     if not social:
         return jsonify({'msg': 'Пользователь не зарегистрирован!'}), HTTPStatus.NOT_FOUND
@@ -106,7 +124,8 @@ def login():
 @oauth.route('registration/', methods=['POST'])
 def registration():
     provider = post_load(obj=OAuthProviderSet)
-    candidate_raw, profile_raw = provider_get_userinfo(provider)
+    info = GetUserinfoFromOAuth(provider)
+    candidate_raw, profile_raw = info.choose[provider.oauth_provider]()
     candidate = UserSet(**candidate_raw)
 
     user = is_user_exists(candidate, check_email=True)
